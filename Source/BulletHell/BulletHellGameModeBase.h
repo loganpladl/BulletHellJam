@@ -13,5 +13,21 @@ UCLASS()
 class BULLETHELL_API ABulletHellGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
+private:
+	void HandleGameStart();
+	void HandleGameOver();
+
+
+
+public:
+	void PlayerDied();
+
+protected:
+	virtual void BeginPlay();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void GameStart();
+	UFUNCTION(BlueprintImplementableEvent)
+	void GameOver();
 };
