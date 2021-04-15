@@ -3,9 +3,14 @@
 
 #include "PlayerPawn.h"
 #include "Math/Vector.h"
+#include "BulletHellGameStateBase.h"
+#include "Engine/World.h"
 
 APlayerPawn::APlayerPawn() {
-
+	MinX = 0.0f;
+	MaxX = 0.0f;
+	MinZ = 0.0f;
+	MaxZ = 0.0f;
 }
 
 // Called when the game starts or when spawned
@@ -13,6 +18,13 @@ void APlayerPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
+	ABulletHellGameStateBase* GameState = Cast<ABulletHellGameStateBase>(GetWorld()->GetGameState());
+	if (!GameState) {
+		UE_LOG(LogTemp, Error, TEXT("Cannot find GameState."))
+	}
+	else {
+		GameState->GetPlayAreaBorders(MinX, MaxX, MinZ, MaxZ);
+	}
 }
 
 // Called every frame
@@ -69,4 +81,26 @@ void APlayerPawn::Move(float DeltaTime) {
 	}
 
 	AddActorLocalOffset(MoveDirection * speed * DeltaTime, true);
+
+	ClampPosition();
+}
+
+void APlayerPawn::ClampPosition() {
+	FVector location = GetActorLocation();
+	if (location.X < MinX) {
+		location.X = MinX;
+		SetActorLocation({ location.X, location.Y, location.Z }, true);
+	}
+	else if (location.X > MaxX) {
+		location.X = MaxX;
+		SetActorLocation({ location.X, location.Y, location.Z }, true);
+	}
+	if (location.Z < MinZ) {
+		location.Z = MinZ;
+		SetActorLocation({ location.X, location.Y, location.Z }, true);
+	}
+	else if (location.Z > MaxZ) {
+		location.Z = MaxZ;
+		SetActorLocation({ location.X, location.Y, location.Z }, true);
+	}
 }

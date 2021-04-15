@@ -18,8 +18,6 @@ private:
 	void HandleGameStart();
 	void HandleGameOver();
 
-
-
 public:
 	void PlayerDied();
 

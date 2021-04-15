@@ -40,6 +40,10 @@ private:
 
 	void Move(float DeltaTime);
 
+	float MinX, MaxX, MinZ, MaxZ;
+
+	void ClampPosition();
+
 public:
 	APlayerPawn();
 
