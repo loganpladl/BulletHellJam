@@ -13,3 +13,11 @@ void ABulletHellGameStateBase::GetPlayAreaBorders(float& MinX, float& MaxX, floa
 	MinZ = -HalfHeight + PlayAreaBorder;
 	MaxZ = HalfHeight - PlayAreaBorder;
 }
+
+float ABulletHellGameStateBase::HorizontalFracToWorld(float x) {
+	return x * (PlayAreaWidth / 2);
+}
+
+float ABulletHellGameStateBase::VerticalFracToWorld(float y) {
+	return y * (PlayAreaHeight / 2);
+}

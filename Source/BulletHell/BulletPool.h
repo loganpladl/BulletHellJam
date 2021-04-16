@@ -4,16 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Bullet.generated.h"
+#include "BulletPool.generated.h"
 
 UCLASS()
-class BULLETHELL_API ABullet : public AActor
+class BULLETHELL_API ABulletPool : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	ABullet();
+	ABulletPool();
 
 protected:
 	// Called when the game starts or when spawned
