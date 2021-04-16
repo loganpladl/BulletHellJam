@@ -5,6 +5,8 @@
 #include "EnemyPawn.h"
 #include "BulletHellGameStateBase.h"
 #include "Engine/World.h"
+#include "BaseEnemyMovement.h"
+#include "UObject/UObjectGlobals.h"
 
 // Sets default values for this component's properties
 UEnemySpawner::UEnemySpawner()
@@ -36,15 +38,24 @@ void UEnemySpawner::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 }
 
 // Input x from 0 to 1 where 0 is left side of play area and 1 is right side
-void UEnemySpawner::SpawnEnemyAtX(TSubclassOf<AEnemyPawn> EnemyClass, float x) {
+void UEnemySpawner::SpawnEnemyAtX(TSubclassOf<AEnemyPawn> EnemyClass, TSubclassOf<UBaseEnemyMovement> MovementClass, float x) {
 	ABulletHellGameStateBase* GameState = Cast<ABulletHellGameStateBase>(GetWorld()->GetGameState());
-	float xWorld = GameState->HorizontalFracToWorld(x);
-	float yWorld = GameState->GetPlayAreaPlanePosition();
-	float zWorld = GameState->VerticalFracToWorld(DefaultSpawnYFrac);
+	float XWorld = GameState->HorizontalFracToWorld(x);
+	float YWorld = GameState->GetPlayAreaPlanePosition();
+	float ZWorld = GameState->VerticalFracToWorld(DefaultSpawnYFrac);
 
-	AEnemyPawn* enemy = GetWorld()->SpawnActor<AEnemyPawn>(EnemyClass, {xWorld, yWorld, zWorld}, { 0,0,0 });
-	enemy->SetOwner(this->GetOwner());
+	AEnemyPawn* Enemy = GetWorld()->SpawnActor<AEnemyPawn>(EnemyClass, {XWorld, YWorld, ZWorld}, { 0,0,0 });
+	Enemy->SetOwner(this->GetOwner());
+
+
+	UBaseEnemyMovement* MovementComponent = NewObject<UBaseEnemyMovement>(Enemy, MovementClass, TEXT("MovementComponent"));
+	if (MovementComponent) {
+		MovementComponent->RegisterComponent();
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Could not create movement component."));
+	}
+	
 
 	UE_LOG(LogTemp, Warning, TEXT("Event called successfully."));
 }
-

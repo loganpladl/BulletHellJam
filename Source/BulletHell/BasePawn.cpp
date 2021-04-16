@@ -17,8 +17,3 @@ ABasePawn::ABasePawn()
 	FlipbookComponent = CreateDefaultSubobject<UPaperFlipbookComponent>(TEXT("Base Flipbook"));
 	FlipbookComponent->SetupAttachment(CapsuleComponent);
 }
-
-void ABasePawn::BeginPlay() {
-	
-}
-

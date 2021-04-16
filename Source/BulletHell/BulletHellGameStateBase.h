@@ -25,6 +25,9 @@ public:
 	// Given a position from -1 to 1 from the bottom of the play area to the top, return y in world coords
 	float VerticalFracToWorld(float y);
 
+	// Given a world position, convert to fraction -1 to 1
+	float WorldToVerticalFrac(float y);
+
 	float GetPlayAreaPlanePosition() { return PlayAreaPlanePosition; }
 
 protected:

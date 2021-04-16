@@ -21,3 +21,7 @@ float ABulletHellGameStateBase::HorizontalFracToWorld(float x) {
 float ABulletHellGameStateBase::VerticalFracToWorld(float y) {
 	return y * (PlayAreaHeight / 2);
 }
+
+float ABulletHellGameStateBase::WorldToVerticalFrac(float y) {
+	return y / (PlayAreaHeight / 2);
+}

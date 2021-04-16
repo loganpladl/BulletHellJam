@@ -24,7 +24,4 @@ private:
 public:
 	// Sets default values for this pawn's properties
 	ABasePawn();
-
-protected:
-	virtual void BeginPlay();
 };

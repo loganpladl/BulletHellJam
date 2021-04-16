@@ -7,6 +7,7 @@
 #include "EnemySpawner.generated.h"
 
 class AEnemyPawn;
+class UBaseEnemyMovement;
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -22,7 +23,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable, Category = "LevelEvents")
-	void SpawnEnemyAtX(TSubclassOf<AEnemyPawn> EnemyClass, float x);
+	void SpawnEnemyAtX(TSubclassOf<AEnemyPawn> EnemyClass, TSubclassOf<UBaseEnemyMovement> MovementClass, float x);
 
 protected:
 	// Called when the game starts

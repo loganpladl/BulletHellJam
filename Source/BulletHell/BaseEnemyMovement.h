@@ -7,7 +7,7 @@
 #include "BaseEnemyMovement.generated.h"
 
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), Blueprintable)
 class BULLETHELL_API UBaseEnemyMovement : public UActorComponent
 {
 	GENERATED_BODY()
@@ -19,11 +19,12 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	virtual void Move(float DeltaTime);
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-private:
 	UPROPERTY(category = "Movement", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float MoveSpeed = 500.0f;
 };

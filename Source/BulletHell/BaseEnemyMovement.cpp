@@ -29,6 +29,11 @@ void UBaseEnemyMovement::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+	Move(DeltaTime);
+}
+
+// To be overriden by derived classes
+void UBaseEnemyMovement::Move(float DeltaTime) {
+
 }
 

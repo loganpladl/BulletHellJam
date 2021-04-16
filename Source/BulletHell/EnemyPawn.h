@@ -18,9 +18,5 @@ class BULLETHELL_API AEnemyPawn : public ABasePawn
 
 public:
 	AEnemyPawn();
-
-private:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement Type", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<UBaseEnemyMovement> MovementClass;
 };
 
