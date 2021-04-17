@@ -28,7 +28,7 @@ void ABaseBullet::BeginPlay()
 	GameState = Cast<ABulletHellGameStateBase>(GetWorld()->GetGameState());
 
 	// Add dynamic on hit binding
-	CapsuleComponent->OnComponentHit.AddDynamic(this, &ABaseBullet::OnHit);
+	CapsuleComponent->OnComponentBeginOverlap.AddDynamic(this, &ABaseBullet::OnOverlapBegin);
 }
 
 // Called every frame
@@ -67,7 +67,7 @@ void ABaseBullet::SetVelocity(FVector NewVelocity) {
 
 void ABaseBullet::Move(float DeltaTime) {
 	FVector CurrentLocation = this->GetActorLocation();
-	this->SetActorLocation(CurrentLocation + (CurrentVelocity * DeltaTime));
+	this->SetActorLocation(CurrentLocation + (CurrentVelocity * DeltaTime), true);
 }
 
 void ABaseBullet::CheckBounds() {
@@ -86,10 +86,8 @@ void ABaseBullet::CheckBounds() {
 	}
 }
 
-void ABaseBullet::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
+void ABaseBullet::OnOverlapBegin(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Bullet Collision"));
-
 	// Check if the other actor is the player
 	if (OtherActor && OtherActor->ActorHasTag(FName(TEXT("Player")))) {
 

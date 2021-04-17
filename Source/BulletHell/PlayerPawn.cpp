@@ -27,7 +27,7 @@ void APlayerPawn::BeginPlay()
 	}
 
 	// Add tag for bullets to check
-	this->Tags.AddUnique(TEXT("MyTag"));
+	this->Tags.AddUnique(TEXT("Player"));
 }
 
 // Called every frame
