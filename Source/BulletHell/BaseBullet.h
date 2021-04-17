@@ -48,5 +48,5 @@ private:
 	ABulletHellGameStateBase* GameState;
 
 	UFUNCTION()
-	void OnHit;
+	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
 };

@@ -85,3 +85,13 @@ void ABaseBullet::CheckBounds() {
 		Pool->Disable(this);
 	}
 }
+
+void ABaseBullet::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Bullet Collision"));
+
+	// Check if the other actor is the player
+	if (OtherActor && OtherActor->ActorHasTag(FName(TEXT("Player")))) {
+
+	}
+}

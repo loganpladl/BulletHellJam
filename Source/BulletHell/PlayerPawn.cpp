@@ -25,6 +25,9 @@ void APlayerPawn::BeginPlay()
 	else {
 		GameState->GetPlayAreaBorders(MinX, MaxX, MinZ, MaxZ);
 	}
+
+	// Add tag for bullets to check
+	this->Tags.AddUnique(TEXT("MyTag"));
 }
 
 // Called every frame
