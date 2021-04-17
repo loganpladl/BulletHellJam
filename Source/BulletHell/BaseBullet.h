@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Math/Vector.h"
+#include "BulletHellGameStateBase.h"
 #include "BaseBullet.generated.h"
 
 class UCapsuleComponent;
@@ -21,14 +23,30 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	void Disable();
+	void Enable();
+
+	void SetVelocity(FVector NewVelocity);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	void Move(float DeltaTime);
 
 private:
 	UPROPERTY(Category = "Components", VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UCapsuleComponent* CapsuleComponent;
 
-	UPROPERTY(Category = Components, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Category = "Components", VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UPaperFlipbookComponent* FlipbookComponent;
+
+	FVector CurrentVelocity = { 0,0,0 };
+
+	void CheckBounds();
+
+	ABulletHellGameStateBase* GameState;
+
+	UFUNCTION()
+	void OnHit;
 };

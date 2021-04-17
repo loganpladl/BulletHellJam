@@ -8,6 +8,7 @@
 
 class UCapsuleComponent;
 class UPaperFlipbookComponent;
+class USceneComponent;
 
 UCLASS()
 class BULLETHELL_API ABasePawn : public APawn
@@ -18,8 +19,11 @@ private:
 	UPROPERTY(Category = "Components", VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UCapsuleComponent* CapsuleComponent;
 
-	UPROPERTY(Category = Components, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Category = "Components", VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UPaperFlipbookComponent* FlipbookComponent;
+
+	UPROPERTY(Category = "Components", VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	USceneComponent* BulletSpawnPoint;
 
 public:
 	// Sets default values for this pawn's properties

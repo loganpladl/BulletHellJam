@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
+#include "Math/Vector.h"
 #include "BulletHellGameStateBase.generated.h"
 
 /**
@@ -27,8 +28,15 @@ public:
 
 	// Given a world position, convert to fraction -1 to 1
 	float WorldToVerticalFrac(float y);
+	float WorldToHorizontalFrac(float x);
 
 	float GetPlayAreaPlanePosition() { return PlayAreaPlanePosition; }
+
+	// Return player horizontal position from -1 to 1 where -1 is the left side of the play area and 1 is the right side
+	float GetPlayerHorizontalFrac();
+	float GetPlayerVerticalFrac();
+
+	bool IsOutOfBounds(FVector Position);
 
 protected:
 	UPROPERTY(Category = "Play Area", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
@@ -38,8 +46,12 @@ protected:
 	float PlayAreaHeight = 1080.0f;
 
 	UPROPERTY(Category = "Play Area", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	float PlayAreaBorder = 48.0f;
+	float PlayAreaBorder = 32.0f;
 
 	UPROPERTY(Category = "Play Area", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float PlayAreaPlanePosition = -550.0f;
+
+	// How far outside play area is considered out of bounds in terms of the above "Frac" functions
+	UPROPERTY(Category = "Play Area", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	float OutOfBoundsMargin = 1.1f;
 };

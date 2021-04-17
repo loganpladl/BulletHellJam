@@ -8,6 +8,7 @@
 
 class AEnemyPawn;
 class UBaseEnemyMovement;
+class UBaseBulletPattern;
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -23,7 +24,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable, Category = "LevelEvents")
-	void SpawnEnemyAtX(TSubclassOf<AEnemyPawn> EnemyClass, TSubclassOf<UBaseEnemyMovement> MovementClass, float x);
+	void SpawnEnemyAtX(TSubclassOf<AEnemyPawn> EnemyClass, TSubclassOf<UBaseEnemyMovement> MovementClass, TSubclassOf<UBaseBulletPattern> BulletPattern, float x);
 
 protected:
 	// Called when the game starts
