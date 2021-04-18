@@ -7,6 +7,7 @@
 
 ABulletHellGameStateBase::ABulletHellGameStateBase() {
 	PlayerRespawnTimer = PlayerRespawnDuration;
+	PlayerInvulnerableTimer = PlayerInvulnerableDuration;
 
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -25,7 +26,24 @@ void ABulletHellGameStateBase::Tick(float DeltaTime) {
 			// Respawn Player
 			PlayerDead = false;
 
+			// Make player invulnerable and setup timers
+			PlayerPawn->MakeInvulnerable();
+			PlayerInvulnerable = true;
+			PlayerInvulnerableTimer = PlayerInvulnerableDuration;
+
 			PlayerPawn->Enable();
+			PlayerPawn->Respawn();
+		}
+	}
+
+	if (PlayerInvulnerable) {
+		PlayerInvulnerableTimer -= DeltaTime;
+
+		if (PlayerInvulnerableTimer <= 0) {
+			// Make player vulnerable
+			PlayerInvulnerable = false;
+
+			PlayerPawn->MakeVulnerable();
 		}
 	}
 }

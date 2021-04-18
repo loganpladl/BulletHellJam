@@ -47,6 +47,8 @@ void UBaseBulletPattern::BeginPlay()
 	
 	ShotTimer = FireRate;
 	CurrentAngle = InitialAngle;
+
+	Enabled = !StartDisabled;
 }
 
 
@@ -56,7 +58,7 @@ void UBaseBulletPattern::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	ShotTimer -= DeltaTime;
-	if (ShotTimer <= 0) {
+	if (ShotTimer <= 0 && Enabled) {
 		Fire();
 		ShotTimer = FireRate;
 	}
@@ -107,3 +109,22 @@ void UBaseBulletPattern::Fire() {
 	}
 }
 
+void UBaseBulletPattern::SetFireRateMultiplier() {
+
+}
+
+void UBaseBulletPattern::SetTargetAngle() {
+
+}
+
+void UBaseBulletPattern::SetBulletSpeedMultiplier() {
+
+}
+
+void UBaseBulletPattern::Enable() {
+	Enabled = true;
+}
+
+void UBaseBulletPattern::Disable() {
+	Enabled = false;
+}

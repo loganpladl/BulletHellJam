@@ -4,6 +4,7 @@
 #include "ScrollBackgroundComponent.h"
 #include "BulletHellGameStateBase.h"
 #include "Engine/World.h"
+#include "Math/UnrealMathUtility.h"
 
 // Sets default values for this component's properties
 UScrollBackgroundComponent::UScrollBackgroundComponent()
@@ -24,7 +25,9 @@ void UScrollBackgroundComponent::BeginPlay()
 	StartingPosition = this->GetOwner()->GetActorLocation();
 	CurrentVerticalHeight = StartingPosition.Z;
 
-	
+	TargetPosition = StartingPosition;
+
+	Owner = this->GetOwner();
 }
 
 
@@ -36,28 +39,26 @@ void UScrollBackgroundComponent::TickComponent(float DeltaTime, ELevelTick TickT
 	ScrollHorizontal();
 
 	ScrollVertical(DeltaTime);
+
+	
+	FVector NewLocation = FMath::Lerp(Owner->GetActorLocation(), TargetPosition, ScrollSpeed * DeltaTime);
+	Owner->SetActorLocation(NewLocation);
 }
 
 
 void UScrollBackgroundComponent::ScrollHorizontal() {
-	AActor* Owner = this->GetOwner();
-	FVector CurrentBackgroundPosition = Owner->GetActorLocation();
-
 	ABulletHellGameStateBase* GameState = Cast<ABulletHellGameStateBase>(GetWorld()->GetGameState());
 
 	// Horizontal position from -1 to 1
 	float PlayerFracPosition = GameState->GetPlayerHorizontalFrac();
 	float NewX = StartingPosition.X - (PlayerFracPosition * HorizontalPadding);
 
-	FVector NewBackgroundPosition = { NewX, CurrentBackgroundPosition.Y, CurrentBackgroundPosition.Z };
-	Owner->SetActorLocation(NewBackgroundPosition);
+	FVector NewBackgroundPosition = { NewX, TargetPosition.Y, TargetPosition.Z };
+	TargetPosition = NewBackgroundPosition;
 }
 
 void UScrollBackgroundComponent::ScrollVertical(float DeltaTime) {
 	float AmountToScroll = 0;
-
-	AActor* Owner = this->GetOwner();
-	FVector CurrentBackgroundPosition = Owner->GetActorLocation();
 
 	// Scroll over time
 	if (CurrentLengthScrolled < VerticalScrollLength) {
@@ -74,6 +75,6 @@ void UScrollBackgroundComponent::ScrollVertical(float DeltaTime) {
 	float PlayerFracPosition = GameState->GetPlayerVerticalFrac();
 	NewZ = CurrentVerticalHeight - (PlayerFracPosition * VerticalPadding);
 
-	FVector NewBackgroundPosition = { CurrentBackgroundPosition.X, CurrentBackgroundPosition.Y, NewZ };
-	Owner->SetActorLocation(NewBackgroundPosition);
+	FVector NewBackgroundPosition = { TargetPosition.X, TargetPosition.Y, NewZ };
+	TargetPosition = NewBackgroundPosition;
 }

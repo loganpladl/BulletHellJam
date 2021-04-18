@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "PaperFlipbookComponent.h"
 #include "BasePawn.generated.h"
 
 class UCapsuleComponent;
@@ -15,7 +16,7 @@ class BULLETHELL_API ABasePawn : public APawn
 {
 	GENERATED_BODY()
 
-private:
+protected:
 	UPROPERTY(Category = "Components", VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UCapsuleComponent* CapsuleComponent;
 

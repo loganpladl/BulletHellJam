@@ -3,6 +3,7 @@
 
 #include "EnemyBullet.h"
 #include "Components/CapsuleComponent.h"
+#include "PlayerPawn.h"
 
 // Called when the game starts or when spawned
 void AEnemyBullet::BeginPlay()
@@ -17,9 +18,12 @@ void AEnemyBullet::OnOverlapBegin(UPrimitiveComponent* HitComponent, AActor* Oth
 {
 	// Check if the other actor is the player
 	if (OtherActor && OtherActor->ActorHasTag(FName(TEXT("Player")))) {
-		GameState->DecrementPlayerHealth();
-		// TODO: Spawn particle effect and play sound effect
+		APlayerPawn* Player = Cast<APlayerPawn>(OtherActor);
+		if (Player->IsVulnerable()) {
+			GameState->DecrementPlayerHealth();
+			// TODO: Spawn particle effect and play sound effect
 
-		DisableFromPool();
+			DisableFromPool();
+		}
 	}
 }

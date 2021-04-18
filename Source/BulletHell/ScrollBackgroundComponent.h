@@ -51,4 +51,12 @@ private:
 	void ScrollHorizontal();
 
 	void ScrollVertical(float DeltaTime);
+
+	// Location to lerp to
+	FVector TargetPosition;
+
+	UPROPERTY(Category = "Background Scrolling", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	float ScrollSpeed = 2.5f;
+
+	AActor* Owner;
 };

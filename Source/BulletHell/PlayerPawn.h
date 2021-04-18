@@ -8,6 +8,8 @@
 
 struct FVector;
 
+class UPlayerBulletPattern;
+
 /**
  * 
  */
@@ -38,7 +40,36 @@ private:
 	UPROPERTY(category = "Movement", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float MoveSpeedSlow = 500.0f;
 
+	UPROPERTY(Category = "Bullet Patterns", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UPlayerBulletPattern> BulletPatternRank0Type;
+
+	UPROPERTY(Category = "Bullet Patterns", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UPlayerBulletPattern> BulletPatternRank1Type;
+
+	UPROPERTY(Category = "Bullet Patterns", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UPlayerBulletPattern> BulletPatternRank2Type;
+
+	UPROPERTY(Category = "Bullet Patterns", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UPlayerBulletPattern> BulletPatternRank3Type;
+
+	UPROPERTY(Category = "Bullet Patterns", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UPlayerBulletPattern> BulletPatternRank4Type;
+
+	UPROPERTY(Category = "Bullet Patterns", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UPlayerBulletPattern> BulletPatternRank5Type;
+
+	UPlayerBulletPattern* BulletPatternRank0Component;
+	UPlayerBulletPattern* BulletPatternRank1Component;
+	UPlayerBulletPattern* BulletPatternRank2Component;
+	UPlayerBulletPattern* BulletPatternRank3Component;
+	UPlayerBulletPattern* BulletPatternRank4Component;
+	UPlayerBulletPattern* BulletPatternRank5Component;
+
+	int32 CurrentBulletPatternRank = 0;
+
 	void Move(float DeltaTime);
+
+	void Fire(float DeltaTime);
 
 	float MinX, MaxX, MinZ, MaxZ;
 
@@ -46,7 +77,9 @@ private:
 
 	FVector RespawnPosition;
 
+	bool Invulnerable = false;
 
+	void CreateBulletPatterns();
 
 public:
 	APlayerPawn();
@@ -61,6 +94,15 @@ public:
 	void Enable();
 
 	void Respawn();
+
+	void MakeInvulnerable();
+	void MakeVulnerable();
+
+	bool IsVulnerable();
+
+	void SetBulletPatternRank(int32 Rank) { CurrentBulletPatternRank = Rank; }
+
+	UPlayerBulletPattern* GetCurrentBulletPatternComponent();
 
 protected:
 	// Called when the game starts or when spawned

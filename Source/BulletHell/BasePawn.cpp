@@ -3,7 +3,6 @@
 
 #include "BasePawn.h"
 #include "Components/CapsuleComponent.h"
-#include "PaperFlipbookComponent.h"
 #include "Components/SceneComponent.h"
 
 // Sets default values

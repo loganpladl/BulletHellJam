@@ -117,8 +117,12 @@ private:
 	int CurrentPlayerLives = 3;
 
 	float PlayerRespawnTimer;
-	const float PlayerRespawnDuration = 3.0f;
+	const float PlayerRespawnDuration = 2.0f;
 	bool PlayerDead = false;
 
 	APlayerPawn* PlayerPawn;
+
+	bool PlayerInvulnerable = false;
+	const float PlayerInvulnerableDuration = 2.0f;
+	float PlayerInvulnerableTimer;
 };

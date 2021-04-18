@@ -29,8 +29,14 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-private:
+	void SetFireRateMultiplier();
+	void SetTargetAngle();
+	void SetBulletSpeedMultiplier();
 
+	void Enable();
+	void Disable();
+
+protected:
 	// Bullet pool to draw from. Dictates the type of bullets spawned.
 	UPROPERTY(Category = "Bullet Pool", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<ABulletPool> BulletPoolType;
@@ -67,8 +73,13 @@ private:
 	UPROPERTY(Category = "Bullet Pool", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	float InitialAngle = 270.0f;
 
+	UPROPERTY(Category = "Bullet Pool", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	bool StartDisabled = false;
+
 	USceneComponent* SpawnPointComponent = nullptr;
 
 	float ShotTimer;
 	float CurrentAngle;
+
+	bool Enabled = true;
 };
