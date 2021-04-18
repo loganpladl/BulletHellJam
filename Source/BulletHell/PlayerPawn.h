@@ -44,6 +44,10 @@ private:
 
 	void ClampPosition();
 
+	FVector RespawnPosition;
+
+
+
 public:
 	APlayerPawn();
 
@@ -52,6 +56,11 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	void Disable();
+	void Enable();
+
+	void Respawn();
 
 protected:
 	// Called when the game starts or when spawned

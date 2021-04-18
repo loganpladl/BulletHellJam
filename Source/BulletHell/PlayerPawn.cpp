@@ -28,6 +28,8 @@ void APlayerPawn::BeginPlay()
 
 	// Add tag for bullets to check
 	this->Tags.AddUnique(TEXT("Player"));
+
+	RespawnPosition = GetActorLocation();
 }
 
 // Called every frame
@@ -106,4 +108,28 @@ void APlayerPawn::ClampPosition() {
 		location.Z = MaxZ;
 		SetActorLocation({ location.X, location.Y, location.Z }, true);
 	}
+}
+
+void APlayerPawn::Disable() {
+	this->SetActorHiddenInGame(true);
+
+	// Disables collision components
+	this->SetActorEnableCollision(false);
+
+	// Stops the Actor from ticking
+	this->SetActorTickEnabled(false);
+}
+
+void APlayerPawn::Enable() {
+	this->SetActorHiddenInGame(false);
+
+	// Disables collision components
+	this->SetActorEnableCollision(true);
+
+	// Stops the Actor from ticking
+	this->SetActorTickEnabled(true);
+}
+
+void APlayerPawn::Respawn() {
+	SetActorLocation(RespawnPosition);
 }

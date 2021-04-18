@@ -34,19 +34,21 @@ protected:
 
 	void Move(float DeltaTime);
 
-private:
+	UFUNCTION()
+	virtual	void OnOverlapBegin(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	void DisableFromPool();
+
 	UPROPERTY(Category = "Components", VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UCapsuleComponent* CapsuleComponent;
 
 	UPROPERTY(Category = "Components", VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UPaperFlipbookComponent* FlipbookComponent;
 
+	ABulletHellGameStateBase* GameState;
+
+private:
 	FVector CurrentVelocity = { 0,0,0 };
 
 	void CheckBounds();
-
-	ABulletHellGameStateBase* GameState;
-
-	UFUNCTION()
-	void OnOverlapBegin(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 };

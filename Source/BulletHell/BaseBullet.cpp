@@ -26,9 +26,6 @@ void ABaseBullet::BeginPlay()
 	Super::BeginPlay();
 
 	GameState = Cast<ABulletHellGameStateBase>(GetWorld()->GetGameState());
-
-	// Add dynamic on hit binding
-	CapsuleComponent->OnComponentBeginOverlap.AddDynamic(this, &ABaseBullet::OnOverlapBegin);
 }
 
 // Called every frame
@@ -75,21 +72,21 @@ void ABaseBullet::CheckBounds() {
 
 	// Disable this bullet
 	if (IsOutOfBounds) {
-		AActor* PtrOwner = this->GetOwner();
-		if (!PtrOwner) {
-			UE_LOG(LogTemp, Warning, TEXT("Couldn't find owner."));
-		}
-
-		ABulletPool* Pool = Cast<ABulletPool>(PtrOwner);
-
-		Pool->Disable(this);
+		DisableFromPool();
 	}
 }
 
 void ABaseBullet::OnOverlapBegin(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	// Check if the other actor is the player
-	if (OtherActor && OtherActor->ActorHasTag(FName(TEXT("Player")))) {
+}
 
+void ABaseBullet::DisableFromPool() {
+	AActor* PtrOwner = this->GetOwner();
+	if (!PtrOwner) {
+		UE_LOG(LogTemp, Warning, TEXT("Couldn't find owner."));
 	}
+
+	ABulletPool* Pool = Cast<ABulletPool>(PtrOwner);
+
+	Pool->Disable(this);
 }

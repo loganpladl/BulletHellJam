@@ -3,9 +3,12 @@
 
 #include "BulletHellGameModeBase.h"
 
-void ABulletHellGameModeBase::BeginPlay() {
-	// Get references and win/lose conditions
+ABulletHellGameModeBase::ABulletHellGameModeBase() {
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
+}
 
+void ABulletHellGameModeBase::BeginPlay() {
 	HandleGameStart(); // initialization
 }
 

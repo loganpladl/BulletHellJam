@@ -69,7 +69,15 @@ void UBaseBulletPattern::Fire() {
 
 		FVector SpawnPosition = SpawnPointComponent->GetComponentLocation();
 
-		float AngleBetweenStreams = StreamAngle / BulletStreamsPerSection;
+		float AngleBetweenStreams;
+
+		// Special case for circular angle to avoid double bullet stream at initial angle
+		if (StreamAngle == 360) {
+			AngleBetweenStreams = StreamAngle / BulletStreamsPerSection;
+		}
+		else {
+			AngleBetweenStreams = StreamAngle / (BulletStreamsPerSection - 1);
+		}
 
 		float Angle;
 		// Spawn each section
@@ -81,11 +89,14 @@ void UBaseBulletPattern::Fire() {
 				float Cos, Sin;
 
 				FMath::SinCos(&Sin, &Cos, FMath::DegreesToRadians(Angle));
-
 				FVector Velocity = { Cos * BulletSpeed, 0, Sin * BulletSpeed };
-				FRotator Rotation = Velocity.Rotation();
+				
+				// Get rotation. Sprites are all oriented downwards, but we want to treat 0 degrees as facing rightward like in unit circle.
+				// TODO: Definitely not the best way to do this, but capsule component is root component of bullets so I can't rotate that.
+				FMath::SinCos(&Sin, &Cos, FMath::DegreesToRadians(Angle + 90));
+				FVector Rotation = { Cos, 0, Sin };
 
-				BulletPool->Instantiate(SpawnPosition, Rotation, Velocity);
+				BulletPool->Instantiate(SpawnPosition, Rotation.Rotation(), Velocity);
 
 				Angle += AngleBetweenStreams;
 			}

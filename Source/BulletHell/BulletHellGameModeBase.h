@@ -20,6 +20,7 @@ private:
 
 public:
 	void PlayerDied();
+	ABulletHellGameModeBase();
 
 protected:
 	virtual void BeginPlay();
