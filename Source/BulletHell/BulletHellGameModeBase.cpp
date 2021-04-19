@@ -9,6 +9,8 @@ ABulletHellGameModeBase::ABulletHellGameModeBase() {
 }
 
 void ABulletHellGameModeBase::BeginPlay() {
+	Super::BeginPlay();
+
 	HandleGameStart(); // initialization
 }
 

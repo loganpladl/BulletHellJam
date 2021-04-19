@@ -19,4 +19,13 @@ ABasePawn::ABasePawn()
 
 	BulletSpawnPoint = CreateDefaultSubobject<USceneComponent>(TEXT("Bullet Spawn Point"));
 	BulletSpawnPoint->SetupAttachment(CapsuleComponent);
+
+	FireAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Fire Audio"));
+	FireAudioComponent->SetupAttachment(CapsuleComponent);
+
+	DamagedAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Damaged Audio"));
+	DamagedAudioComponent->SetupAttachment(CapsuleComponent);
+
+	DeathAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Death Audio"));
+	DeathAudioComponent->SetupAttachment(CapsuleComponent);
 }

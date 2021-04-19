@@ -7,6 +7,7 @@
 #include "Engine/World.h"
 #include "Math/Color.h"
 #include "PlayerBulletPattern.h"
+#include "Math/UnrealMathUtility.h"
 
 APlayerPawn::APlayerPawn() {
 	MinX = 0.0f;
@@ -72,6 +73,22 @@ void APlayerPawn::InputMoveVertical(float Value) {
 
 void APlayerPawn::InputMoveHorizontal(float Value) {
 	MoveDirection.X = Value;
+
+	if (Value > 0) {
+		if (BankLeftFlipbook) {
+			FlipbookComponent->SetFlipbook(BankLeftFlipbook);
+		}
+	}
+	else if (Value < 0) {
+		if (BankRightFlipbook) {
+			FlipbookComponent->SetFlipbook(BankRightFlipbook);
+		}
+	}
+	else {
+		if (IdleFlipbook) {
+			FlipbookComponent->SetFlipbook(IdleFlipbook);
+		}
+	}
 }
 
 void APlayerPawn::InputShootPressed() {
@@ -243,4 +260,23 @@ UPlayerBulletPattern* APlayerPawn::GetCurrentBulletPatternComponent() {
 	default:
 		return BulletPatternRank0Component;
 	}
+}
+
+void APlayerPawn::PlayDamagedSound() {
+	if (DamagedSounds.Num() == 0) {
+		UE_LOG(LogTemp, Warning, TEXT("No Damaged sounds added to player pawn."));
+		return;
+	}
+	int32 Index = FMath::RandRange(0, DamagedSounds.Num() - 1);
+	DamagedAudioComponent->SetSound(DamagedSounds[Index]);
+	DamagedAudioComponent->Play();
+}
+
+void APlayerPawn::PlayFireSound() {
+	FireAudioComponent->SetSound(FireSound);
+	FireAudioComponent->Play();
+}
+
+void APlayerPawn::PlayDeathSound() {
+	DeathAudioComponent->Play();
 }

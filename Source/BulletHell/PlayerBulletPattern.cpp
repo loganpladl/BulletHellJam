@@ -2,4 +2,9 @@
 
 
 #include "PlayerBulletPattern.h"
+#include "PlayerPawn.h"
 
+void UPlayerBulletPattern::PlayFireSound() {
+	APlayerPawn* Player = Cast<APlayerPawn>(this->GetOwner());
+	Player->PlayFireSound();
+}

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "PaperFlipbookComponent.h"
+#include "Components/AudioComponent.h"
 #include "BasePawn.generated.h"
 
 class UCapsuleComponent;
@@ -25,6 +26,15 @@ protected:
 
 	UPROPERTY(Category = "Components", VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	USceneComponent* BulletSpawnPoint;
+
+	UPROPERTY(Category = "Components", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UAudioComponent* FireAudioComponent;
+
+	UPROPERTY(Category = "Components", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UAudioComponent* DamagedAudioComponent;
+
+	UPROPERTY(Category = "Components", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UAudioComponent* DeathAudioComponent;
 
 public:
 	// Sets default values for this pawn's properties

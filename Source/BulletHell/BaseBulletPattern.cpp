@@ -60,6 +60,7 @@ void UBaseBulletPattern::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 	ShotTimer -= DeltaTime;
 	if (ShotTimer <= 0 && Enabled) {
 		Fire();
+		PlayFireSound();
 		ShotTimer = FireRate;
 	}
 
@@ -68,7 +69,6 @@ void UBaseBulletPattern::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 
 void UBaseBulletPattern::Fire() {
 	if (BulletPool && SpawnPointComponent) {
-
 		FVector SpawnPosition = SpawnPointComponent->GetComponentLocation();
 
 		float AngleBetweenStreams;
@@ -127,4 +127,8 @@ void UBaseBulletPattern::Enable() {
 
 void UBaseBulletPattern::Disable() {
 	Enabled = false;
+}
+
+void UBaseBulletPattern::PlayFireSound() {
+
 }

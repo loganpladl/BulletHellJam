@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "BasePawn.h"
+#include "Sound/SoundCue.h"
+#include "Containers/Array.h"
 #include "EnemyPawn.generated.h"
 
 class UBaseEnemyMovement;
@@ -18,5 +20,24 @@ class BULLETHELL_API AEnemyPawn : public ABasePawn
 
 public:
 	AEnemyPawn();
+
+	void DecrementHealth();
+
+	void Die();
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+private:
+	UPROPERTY(category = "Movement", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	int BaseHealth = 3;
+
+	int CurrentHealth;
+
+	UPROPERTY(Category = "Sound", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	TArray<USoundCue*> DeathSounds;
+
+	void PlayDeathSound();
 };
 

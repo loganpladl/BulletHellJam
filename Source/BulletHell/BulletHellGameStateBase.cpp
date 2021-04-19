@@ -14,6 +14,8 @@ ABulletHellGameStateBase::ABulletHellGameStateBase() {
 }
 
 void ABulletHellGameStateBase::BeginPlay() {
+	Super::BeginPlay();
+
 	PlayerPawn = Cast<APlayerPawn>(GetWorld()->GetFirstPlayerController()->GetPawn());
 }
 

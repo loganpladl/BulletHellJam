@@ -82,4 +82,6 @@ protected:
 	float CurrentAngle;
 
 	bool Enabled = true;
+
+	virtual void PlayFireSound();
 };

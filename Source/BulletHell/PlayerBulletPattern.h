@@ -14,4 +14,6 @@ class BULLETHELL_API UPlayerBulletPattern : public UBaseBulletPattern
 {
 	GENERATED_BODY()
 	
+public:
+	void PlayFireSound() override;
 };

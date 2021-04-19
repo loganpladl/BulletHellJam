@@ -20,6 +20,7 @@ void AEnemyBullet::OnOverlapBegin(UPrimitiveComponent* HitComponent, AActor* Oth
 	if (OtherActor && OtherActor->ActorHasTag(FName(TEXT("Player")))) {
 		APlayerPawn* Player = Cast<APlayerPawn>(OtherActor);
 		if (Player->IsVulnerable()) {
+			Player->PlayDamagedSound();
 			GameState->DecrementPlayerHealth();
 			// TODO: Spawn particle effect and play sound effect
 
