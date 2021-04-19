@@ -2,6 +2,8 @@
 
 
 #include "BaseEnemyMovement.h"
+#include "PlayerPawn.h"
+#include "Engine/World.h"
 
 // Sets default values for this component's properties
 UBaseEnemyMovement::UBaseEnemyMovement()
@@ -19,8 +21,7 @@ void UBaseEnemyMovement::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
-	
+	PlayerPawn = Cast<APlayerPawn>(GetWorld()->GetFirstPlayerController()->GetPawn());
 }
 
 

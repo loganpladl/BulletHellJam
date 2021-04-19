@@ -47,7 +47,7 @@ void APlayerPawn::Tick(float DeltaTime)
 
 	UPlayerBulletPattern* BulletPattern = GetCurrentBulletPatternComponent();
 	
-	if (IsShooting) {
+	if (IsShooting && Enabled) {
 		BulletPattern->Enable();
 	}
 	else {
@@ -158,6 +158,8 @@ void APlayerPawn::Disable() {
 
 	// Stops the Actor from ticking
 	this->SetActorTickEnabled(false);
+
+	Enabled = false;
 }
 
 void APlayerPawn::Enable() {
@@ -168,6 +170,8 @@ void APlayerPawn::Enable() {
 
 	// Stops the Actor from ticking
 	this->SetActorTickEnabled(true);
+
+	Enabled = true;
 }
 
 void APlayerPawn::Respawn() {

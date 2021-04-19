@@ -58,6 +58,20 @@ void UBaseBulletPattern::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	ShotTimer -= DeltaTime;
+
+	if (!ReverseSpin) {
+		CurrentSpinSpeed += SpinSpeedDelta * DeltaTime;
+		if (CurrentSpinSpeed >= MaxSpinSpeed) {
+			ReverseSpin = true;
+		}
+	}
+	else {
+		CurrentSpinSpeed += SpinSpeedDelta * DeltaTime;
+		if (CurrentSpinSpeed <= -MaxSpinSpeed) {
+			ReverseSpin = false;
+		}
+	}
+
 	if (ShotTimer <= 0 && Enabled) {
 		Fire();
 		PlayFireSound();
@@ -81,6 +95,30 @@ void UBaseBulletPattern::Fire() {
 			AngleBetweenStreams = StreamAngle / (BulletStreamsPerSection - 1);
 		}
 
+		
+		// Rotate shots according to parent's orientation. Used for enemies that rotate.
+		FRotator ParentRotation = this->GetOwner()->GetActorRotation();
+
+		float Pitch = ParentRotation.Pitch;
+		FVector ParentVector = ParentRotation.Vector();
+		FVector Forward = this->GetOwner()->GetActorUpVector();
+
+		if (ParentVector.X < 0) {
+			if (Forward.Z < 0) {
+				Pitch = 180 - Pitch;
+			}
+			else {
+				Pitch = -Pitch;
+			}
+		}
+		else {
+			if (Forward.Z < 0) {
+				Pitch = -180 + Pitch;
+			}
+		}
+
+		CurrentAngle = InitialAngle + Pitch;
+
 		float Angle;
 		// Spawn each section
 		for (int i = 0; i < BulletSections; i++) {
@@ -90,12 +128,14 @@ void UBaseBulletPattern::Fire() {
 			for (int j = 0; j < BulletStreamsPerSection; j++) {
 				float Cos, Sin;
 
-				FMath::SinCos(&Sin, &Cos, FMath::DegreesToRadians(Angle));
+				float RelativeAngle = Angle;
+
+				FMath::SinCos(&Sin, &Cos, FMath::DegreesToRadians(RelativeAngle));
 				FVector Velocity = { Cos * BulletSpeed, 0, Sin * BulletSpeed };
 				
 				// Get rotation. Sprites are all oriented downwards, but we want to treat 0 degrees as facing rightward like in unit circle.
 				// TODO: Definitely not the best way to do this, but capsule component is root component of bullets so I can't rotate that.
-				FMath::SinCos(&Sin, &Cos, FMath::DegreesToRadians(Angle + 90));
+				FMath::SinCos(&Sin, &Cos, FMath::DegreesToRadians(RelativeAngle + 90));
 				FVector Rotation = { Cos, 0, Sin };
 
 				BulletPool->Instantiate(SpawnPosition, Rotation.Rotation(), Velocity);

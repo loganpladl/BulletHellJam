@@ -102,6 +102,8 @@ private:
 
 	void CreateBulletPatterns();
 
+	bool Enabled = true;
+
 public:
 	APlayerPawn();
 
