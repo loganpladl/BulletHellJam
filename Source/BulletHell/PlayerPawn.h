@@ -4,9 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "BasePawn.h"
+#include "PaperFlipbook.h"
+#include "Sound/SoundCue.h"
+#include "Containers/Array.h"
 #include "PlayerPawn.generated.h"
 
 struct FVector;
+
+class UPlayerBulletPattern;
 
 /**
  * 
@@ -31,6 +36,24 @@ private:
 	bool IsShooting = false;
 	bool IsMovingSlow = false;
 
+	UPROPERTY(Category = "Animation", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UPaperFlipbook* IdleFlipbook;
+
+	UPROPERTY(Category = "Animation", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UPaperFlipbook* BankLeftFlipbook;
+
+	UPROPERTY(Category = "Animation", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UPaperFlipbook* BankRightFlipbook;
+
+	UPROPERTY(Category = "Sound", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	USoundCue* FireSound;
+
+	UPROPERTY(Category = "Sound", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	TArray<USoundCue*> DamagedSounds;
+
+	UPROPERTY(Category = "Sound", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	USoundCue* DeathSound;
+
 	UPROPERTY(category = "Movement", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float MoveSpeedNormal = 1000.0f;
 
@@ -38,11 +61,46 @@ private:
 	UPROPERTY(category = "Movement", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float MoveSpeedSlow = 500.0f;
 
+	UPROPERTY(Category = "Bullet Patterns", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UPlayerBulletPattern> BulletPatternRank0Type;
+
+	UPROPERTY(Category = "Bullet Patterns", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UPlayerBulletPattern> BulletPatternRank1Type;
+
+	UPROPERTY(Category = "Bullet Patterns", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UPlayerBulletPattern> BulletPatternRank2Type;
+
+	UPROPERTY(Category = "Bullet Patterns", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UPlayerBulletPattern> BulletPatternRank3Type;
+
+	UPROPERTY(Category = "Bullet Patterns", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UPlayerBulletPattern> BulletPatternRank4Type;
+
+	UPROPERTY(Category = "Bullet Patterns", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UPlayerBulletPattern> BulletPatternRank5Type;
+
+	UPlayerBulletPattern* BulletPatternRank0Component;
+	UPlayerBulletPattern* BulletPatternRank1Component;
+	UPlayerBulletPattern* BulletPatternRank2Component;
+	UPlayerBulletPattern* BulletPatternRank3Component;
+	UPlayerBulletPattern* BulletPatternRank4Component;
+	UPlayerBulletPattern* BulletPatternRank5Component;
+
+	int32 CurrentBulletPatternRank = 0;
+
 	void Move(float DeltaTime);
+
+	void Fire(float DeltaTime);
 
 	float MinX, MaxX, MinZ, MaxZ;
 
 	void ClampPosition();
+
+	FVector RespawnPosition;
+
+	bool Invulnerable = false;
+
+	void CreateBulletPatterns();
 
 public:
 	APlayerPawn();
@@ -52,6 +110,24 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	void Disable();
+	void Enable();
+
+	void Respawn();
+
+	void MakeInvulnerable();
+	void MakeVulnerable();
+
+	bool IsVulnerable();
+
+	void SetBulletPatternRank(int32 Rank) { CurrentBulletPatternRank = Rank; }
+
+	UPlayerBulletPattern* GetCurrentBulletPatternComponent();
+
+	void PlayDamagedSound();
+	void PlayFireSound();
+	void PlayDeathSound();
 
 protected:
 	// Called when the game starts or when spawned

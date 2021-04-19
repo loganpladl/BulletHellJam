@@ -7,6 +7,7 @@
 #include "Engine/World.h"
 #include "BaseEnemyMovement.h"
 #include "UObject/UObjectGlobals.h"
+#include "BaseBulletPattern.h"
 
 // Sets default values for this component's properties
 UEnemySpawner::UEnemySpawner()
@@ -38,7 +39,7 @@ void UEnemySpawner::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 }
 
 // Input x from 0 to 1 where 0 is left side of play area and 1 is right side
-void UEnemySpawner::SpawnEnemyAtX(TSubclassOf<AEnemyPawn> EnemyClass, TSubclassOf<UBaseEnemyMovement> MovementClass, float x) {
+void UEnemySpawner::SpawnEnemyAtX(TSubclassOf<AEnemyPawn> EnemyClass, TSubclassOf<UBaseEnemyMovement> MovementClass, TSubclassOf<UBaseBulletPattern> BulletPattern, float x) {
 	ABulletHellGameStateBase* GameState = Cast<ABulletHellGameStateBase>(GetWorld()->GetGameState());
 	float XWorld = GameState->HorizontalFracToWorld(x);
 	float YWorld = GameState->GetPlayAreaPlanePosition();
@@ -47,6 +48,10 @@ void UEnemySpawner::SpawnEnemyAtX(TSubclassOf<AEnemyPawn> EnemyClass, TSubclassO
 	AEnemyPawn* Enemy = GetWorld()->SpawnActor<AEnemyPawn>(EnemyClass, {XWorld, YWorld, ZWorld}, { 0,0,0 });
 	Enemy->SetOwner(this->GetOwner());
 
+	if (!MovementClass) {
+		UE_LOG(LogTemp, Warning, TEXT("No movement class set."));
+		return;
+	}
 
 	UBaseEnemyMovement* MovementComponent = NewObject<UBaseEnemyMovement>(Enemy, MovementClass, TEXT("MovementComponent"));
 	if (MovementComponent) {
@@ -55,7 +60,18 @@ void UEnemySpawner::SpawnEnemyAtX(TSubclassOf<AEnemyPawn> EnemyClass, TSubclassO
 	else {
 		UE_LOG(LogTemp, Warning, TEXT("Could not create movement component."));
 	}
-	
 
-	UE_LOG(LogTemp, Warning, TEXT("Event called successfully."));
+
+	if (!BulletPattern) {
+		UE_LOG(LogTemp, Warning, TEXT("No bullet pattern set."));
+		return;
+	}
+
+	UBaseBulletPattern* BulletPatternComponent = NewObject<UBaseBulletPattern>(Enemy, BulletPattern, TEXT("BulletPatternComponent"));
+	if (BulletPatternComponent) {
+		BulletPatternComponent->RegisterComponent();
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Could not create bullet pattern component."));
+	}
 }
