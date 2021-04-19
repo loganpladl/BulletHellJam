@@ -148,6 +148,9 @@ void APlayerPawn::ClampPosition() {
 }
 
 void APlayerPawn::Disable() {
+	UPlayerBulletPattern* BulletPattern = GetCurrentBulletPatternComponent();
+	BulletPattern->Disable();
+
 	this->SetActorHiddenInGame(true);
 
 	// Disables collision components
