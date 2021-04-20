@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
 #include "Math/Vector.h"
+#include "Containers/UnrealString.h"
 #include "BulletHellGameStateBase.generated.h"
 
 
@@ -82,11 +83,17 @@ public:
 	void UpgradeEnemyFireRateRank() { ++EnemyFireRateRank; }
 
 	// Player variables
+	UFUNCTION(BlueprintCallable)
 	int GetCurrentPlayerHealth() { return CurrentPlayerHealth; }
+	UFUNCTION(BlueprintCallable)
 	int GetCurrentPlayerLives() { return CurrentPlayerLives; }
 
 	void DecrementPlayerHealth();
 	void DecrementPlayerLives();
+
+	// Formatted like 9.99
+	UFUNCTION(BlueprintCallable)
+	FString CountdownTimerToString();
 
 protected:
 	UPROPERTY(Category = "Play Area", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
@@ -135,4 +142,8 @@ private:
 	bool PlayerInvulnerable = false;
 	const float PlayerInvulnerableDuration = 2.0f;
 	float PlayerInvulnerableTimer;
+
+	float CountdownTimer;
+	float CountdownDuration = 9.9f;
+
 };

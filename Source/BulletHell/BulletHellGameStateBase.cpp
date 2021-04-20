@@ -17,10 +17,18 @@ void ABulletHellGameStateBase::BeginPlay() {
 	Super::BeginPlay();
 
 	PlayerPawn = Cast<APlayerPawn>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	CountdownTimer = CountdownDuration;
 }
 
 // Called every frame
 void ABulletHellGameStateBase::Tick(float DeltaTime) {
+	CountdownTimer -= DeltaTime;
+	if (CountdownTimer <= 0) {
+		// Spawn Buffs
+
+		CountdownTimer = CountdownDuration;
+	}
+
 	if (PlayerDead) {
 		PlayerRespawnTimer -= DeltaTime;
 
@@ -124,4 +132,9 @@ void ABulletHellGameStateBase::DecrementPlayerLives() {
 	if (CurrentPlayerLives == 0) {
 		// Game Over
 	}
+}
+
+FString ABulletHellGameStateBase::CountdownTimerToString() {
+	FString String = FString::Printf(TEXT("%.1f"), CountdownTimer);
+	return String;
 }
