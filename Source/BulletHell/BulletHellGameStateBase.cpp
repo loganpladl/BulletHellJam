@@ -116,8 +116,6 @@ void ABulletHellGameStateBase::DecrementPlayerHealth() {
 		// Reset health based on player health rank
 		// TODO: Might move this out of here
 		CurrentPlayerHealth = PlayerHealthRank + 3;
-
-		UpgradePlayerHealthRank();
 	}
 }
 
