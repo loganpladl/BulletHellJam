@@ -47,16 +47,26 @@ public:
 	bool IsOutOfBounds(FVector Position);
 
 	// Getters for rank system
+	UFUNCTION(BlueprintCallable)
 	int GetPlayerHealthRank() { return PlayerHealthRank; }
+	UFUNCTION(BlueprintCallable)
 	int GetPlayerDamageRank() { return PlayerDamageRank; }
+	UFUNCTION(BlueprintCallable)
 	int GetPlayerSpeedRank() { return PlayerSpeedRank; }
+	UFUNCTION(BlueprintCallable)
 	int GetPlayerBulletSpreadRank() { return PlayerBulletSpreadRank; }
+	UFUNCTION(BlueprintCallable)
 	int GetPlayerFireRateRank() { return PlayerFireRateRank; }
 
+	UFUNCTION(BlueprintCallable)
 	int GetEnemyHealthRank() { return EnemyHealthRank; }
+	UFUNCTION(BlueprintCallable)
 	int GetEnemyDamageRank() { return EnemyDamageRank; }
+	UFUNCTION(BlueprintCallable)
 	int GetEnemySpeedRank() { return EnemySpeedRank; }
+	UFUNCTION(BlueprintCallable)
 	int GetEnemyBulletSpeedRank() { return EnemyBulletSpeedRank; }
+	UFUNCTION(BlueprintCallable)
 	int GetEnemyFireRateRank() { return EnemyFireRateRank; }
 
 	void UpgradePlayerHealthRank() { ++PlayerHealthRank; }
