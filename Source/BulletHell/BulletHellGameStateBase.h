@@ -10,6 +10,14 @@
 
 
 class APlayerPawn;
+class APickup;
+
+enum class PlayerRank {
+	Health, Damage, Speed, BulletSpread, FireRate
+};
+enum class EnemyRank {
+	Health, Damage, Speed, BulletSpeed, FireRate
+};
 
 /**
  * 
@@ -85,6 +93,10 @@ public:
 	// Player variables
 	UFUNCTION(BlueprintCallable)
 	int GetCurrentPlayerHealth() { return CurrentPlayerHealth; }
+
+	UFUNCTION(BlueprintCallable)
+	int GetCurrentPlayerMaxHealth() { return PlayerHealthRank + 3; }
+
 	UFUNCTION(BlueprintCallable)
 	int GetCurrentPlayerLives() { return CurrentPlayerLives; }
 
@@ -94,6 +106,38 @@ public:
 	// Formatted like 9.99
 	UFUNCTION(BlueprintCallable)
 	FString CountdownTimerToString();
+
+	PlayerRank GetValidRandomPlayerRank();
+	EnemyRank GetValidRandomEnemyRank();
+
+	// Converts integers 0 to 4 to corresponding Player Ranks
+	PlayerRank NumToPlayerRank(int32 Num);
+	// Returns true if this rank can be upgraded (not at rank 5)
+	bool IsValidPlayerUpgrade(PlayerRank Rank);
+
+	EnemyRank NumToEnemyRank(int32 Num);
+	bool IsValidEnemyUpgrade(EnemyRank Rank);
+
+	void StartGameTransition();
+	UFUNCTION(BlueprintCallable)
+	void StartGame();
+
+	UFUNCTION(BlueprintCallable)
+	bool IsGameStarted() { return GameStarted; }
+	UFUNCTION(BlueprintCallable)
+	bool IsGameStartTransitioning() { return GameStartTransitioning; }
+
+	UFUNCTION(BlueprintCallable)
+	bool IsGameRestartTransitioning() { return GameRestartTransitioning; }
+	UFUNCTION(BlueprintCallable)
+	void RestartGame();
+
+	void RestartGameTransition();
+
+	UFUNCTION(BlueprintCallable)
+	bool IsGameOver() { return GameOver; }
+
+	void ClearBuffPickups();
 
 protected:
 	UPROPERTY(Category = "Play Area", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
@@ -111,6 +155,15 @@ protected:
 	// How far outside play area is considered out of bounds in terms of the above "Frac" functions
 	UPROPERTY(Category = "Play Area", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float OutOfBoundsMargin = 1.1f;
+
+	UPROPERTY(Category = "Buffs", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<APickup> PickupClass;
+
+	FVector Buff1SpawnPosition;
+	APickup* CurrentBuff1Pickup;
+
+	FVector Buff2SpawnPosition;
+	APickup* CurrentBuff2Pickup;
 
 	virtual void BeginPlay() override;
 
@@ -146,4 +199,9 @@ private:
 	float CountdownTimer;
 	float CountdownDuration = 9.9f;
 
+	bool GameStarted = false;
+	bool GameStartTransitioning = false;
+	bool GameRestartTransitioning = false;
+
+	bool GameOver = false;
 };

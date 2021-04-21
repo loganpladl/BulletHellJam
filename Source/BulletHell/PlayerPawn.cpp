@@ -8,6 +8,7 @@
 #include "Math/Color.h"
 #include "PlayerBulletPattern.h"
 #include "Math/UnrealMathUtility.h"
+#include "GenericPlatform/GenericPlatformMisc.h"
 
 APlayerPawn::APlayerPawn() {
 	MinX = 0.0f;
@@ -32,7 +33,8 @@ void APlayerPawn::BeginPlay()
 	// Add tag for bullets to check
 	this->Tags.AddUnique(TEXT("Player"));
 
-	RespawnPosition = GetActorLocation();
+	SpawnPosition = GetActorLocation();
+	RespawnPosition = { 0.0f, -550.0f, 0.0f };
 
 	CreateBulletPatterns();
 }
@@ -42,16 +44,40 @@ void APlayerPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	Move(DeltaTime);
+	ABulletHellGameStateBase* GameState = Cast<ABulletHellGameStateBase>(GetWorld()->GetGameState());
+	bool GameStarted = GameState->IsGameStarted();
+	bool GameOver = GameState->IsGameOver();
+	if (GameStarted && !GameOver) {
+		Move(DeltaTime);
 
+		UPlayerBulletPattern* BulletPattern = GetCurrentBulletPatternComponent();
 
-	UPlayerBulletPattern* BulletPattern = GetCurrentBulletPatternComponent();
-	
-	if (IsShooting && Enabled) {
-		BulletPattern->Enable();
+		if (IsShooting && Enabled) {
+			BulletPattern->Enable();
+		}
+		else {
+			BulletPattern->Disable();
+		}
 	}
 	else {
-		BulletPattern->Disable();
+		if (IsShooting && !GameState->IsGameStartTransitioning()) {
+			GameState->StartGameTransition();
+		}
+	}
+
+	if (GameState->IsGameStartTransitioning() && !GameState->IsGameStarted()) {
+		MoveToStart(DeltaTime);
+		if (RestartTransitioning) {
+			RestartTransitioning = false;
+		}
+	}
+
+	if (GameState->IsGameRestartTransitioning()) {
+		if (!RestartTransitioning) {
+			RestartTransitioning = true;
+			IntroMoving = false;
+			this->SetActorLocation(SpawnPosition);
+		}
 	}
 }
 
@@ -65,6 +91,11 @@ void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("Shoot", IE_Released, this, &APlayerPawn::InputShootReleased);
 	PlayerInputComponent->BindAction("Focus", IE_Pressed, this, &APlayerPawn::InputFocusPressed);
 	PlayerInputComponent->BindAction("Focus", IE_Released, this, &APlayerPawn::InputFocusReleased);
+
+	PlayerInputComponent->BindAction("Restart", IE_Pressed, this, &APlayerPawn::InputRestartPressed);
+	PlayerInputComponent->BindAction("Restart", IE_Released, this, &APlayerPawn::InputRestartReleased);
+	PlayerInputComponent->BindAction("Quit", IE_Pressed, this, &APlayerPawn::InputQuitPressed);
+	PlayerInputComponent->BindAction("Quit", IE_Released, this, &APlayerPawn::InputQuitReleased);
 }
 
 void APlayerPawn::InputMoveVertical(float Value) {
@@ -72,21 +103,24 @@ void APlayerPawn::InputMoveVertical(float Value) {
 }
 
 void APlayerPawn::InputMoveHorizontal(float Value) {
-	MoveDirection.X = Value;
+	ABulletHellGameStateBase* GameState = Cast<ABulletHellGameStateBase>(GetWorld()->GetGameState());
+	if (GameState->IsGameStarted()) {
+		MoveDirection.X = Value;
 
-	if (Value > 0) {
-		if (BankLeftFlipbook) {
-			FlipbookComponent->SetFlipbook(BankLeftFlipbook);
+		if (Value > 0) {
+			if (BankLeftFlipbook) {
+				FlipbookComponent->SetFlipbook(BankLeftFlipbook);
+			}
 		}
-	}
-	else if (Value < 0) {
-		if (BankRightFlipbook) {
-			FlipbookComponent->SetFlipbook(BankRightFlipbook);
+		else if (Value < 0) {
+			if (BankRightFlipbook) {
+				FlipbookComponent->SetFlipbook(BankRightFlipbook);
+			}
 		}
-	}
-	else {
-		if (IdleFlipbook) {
-			FlipbookComponent->SetFlipbook(IdleFlipbook);
+		else {
+			if (IdleFlipbook) {
+				FlipbookComponent->SetFlipbook(IdleFlipbook);
+			}
 		}
 	}
 }
@@ -107,6 +141,25 @@ void APlayerPawn::InputFocusReleased() {
 	IsMovingSlow = false;
 }
 
+void APlayerPawn::InputRestartPressed() {
+	ABulletHellGameStateBase* GameState = Cast<ABulletHellGameStateBase>(GetWorld()->GetGameState());
+	if (GameState->IsGameOver()) {
+		GameState->RestartGameTransition();
+	}
+}
+
+void APlayerPawn::InputRestartReleased() {
+
+}
+
+void APlayerPawn::InputQuitPressed() {
+	FGenericPlatformMisc::RequestExit(false);
+}
+
+void APlayerPawn::InputQuitReleased() {
+	FGenericPlatformMisc::RequestExit(false);
+}
+
 void APlayerPawn::Move(float DeltaTime) {
 	float speed;
 	if (IsMovingSlow) {
@@ -125,7 +178,18 @@ void APlayerPawn::Fire(float DeltaTime) {
 	
 }
 
+void APlayerPawn::MoveToStart(float DeltaTime) {
+	if (!IntroMoving) {
+		IntroMoving = true;
+		IntroMoveStartTime = GetWorld()->GetTimeSeconds();
+	}
 
+	float SmoothStepParameter = (GetWorld()->GetTimeSeconds() - IntroMoveStartTime) / IntroDuration;
+
+	float LerpParameter = FMath::SmoothStep(0, 1, SmoothStepParameter);
+	
+	this->SetActorLocation(FMath::Lerp(SpawnPosition, RespawnPosition, LerpParameter));
+}
 
 void APlayerPawn::ClampPosition() {
 	FVector location = GetActorLocation();

@@ -31,6 +31,11 @@ private:
 	void InputFocusPressed();
 	void InputFocusReleased();
 
+	void InputRestartPressed();
+	void InputRestartReleased();
+	void InputQuitPressed();
+	void InputQuitReleased();
+
 	FVector MoveDirection = { 0,0,0 };
 
 	bool IsShooting = false;
@@ -56,6 +61,15 @@ private:
 
 	UPROPERTY(category = "Movement", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float MoveSpeedNormal = 1000.0f;
+
+	UPROPERTY(category = "Movement", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	float IntroDuration = 3.0f;
+
+	bool IntroMoving = false;
+	float IntroMoveStartTime;
+
+	bool RestartTransitioning = false;
+	
 
 	// More precision movement if the player is holding a given button
 	UPROPERTY(category = "Movement", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
@@ -97,12 +111,15 @@ private:
 	void ClampPosition();
 
 	FVector RespawnPosition;
+	FVector SpawnPosition;
 
 	bool Invulnerable = false;
 
 	void CreateBulletPatterns();
 
 	bool Enabled = true;
+
+	void MoveToStart(float DeltaTime);
 
 public:
 	APlayerPawn();

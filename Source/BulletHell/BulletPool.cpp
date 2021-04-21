@@ -67,3 +67,13 @@ void ABulletPool::Disable(ABaseBullet* Bullet) {
 	ActiveBullets.RemoveSingle(Bullet);
 	Pool.Add(Bullet);
 }
+
+void ABulletPool::DisableAllBullets() {
+	for (ABaseBullet* Bullet : ActiveBullets) {
+		Bullet->Disable();
+		Bullet->SetActorLocation({ 0,0,0 }, false); // Set actor to origin for organization
+		Pool.Add(Bullet);
+	}
+
+	ActiveBullets.Empty();
+}
