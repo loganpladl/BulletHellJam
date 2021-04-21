@@ -19,15 +19,25 @@ void AEnemyPawn::DecrementHealth() {
 	if (CurrentHealth <= 0) {
 		Die();
 	}
-
+	else {
+		PlayDamagedSound();
+	}
 	
 }
 
 void AEnemyPawn::Die() {
 	bool Result = this->Destroy();
 	PlayDeathSound();
+}
 
-	UE_LOG(LogTemp, Warning, TEXT("Result: %d"), Result);
+void AEnemyPawn::PlayFireSound() {
+	FireAudioComponent->SetSound(FireSound);
+	FireAudioComponent->Play();
+}
+
+void AEnemyPawn::PlayDamagedSound() {
+	DamagedAudioComponent->SetSound(DamagedSound);
+	DamagedAudioComponent->Play();
 }
 
 void AEnemyPawn::PlayDeathSound() {

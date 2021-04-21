@@ -6,6 +6,8 @@
 #include "GameFramework/GameStateBase.h"
 #include "Math/Vector.h"
 #include "Containers/UnrealString.h"
+#include "Components/AudioComponent.h"
+#include "Sound/SoundCue.h"
 #include "BulletHellGameStateBase.generated.h"
 
 
@@ -139,6 +141,8 @@ public:
 
 	void ClearBuffPickups();
 
+	void PlayPickupSound();
+
 protected:
 	UPROPERTY(Category = "Play Area", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float PlayAreaWidth = 720.0f;
@@ -158,6 +162,12 @@ protected:
 
 	UPROPERTY(Category = "Buffs", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<APickup> PickupClass;
+
+	UPROPERTY(Category = "Sound", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UAudioComponent* PickupAudioComponent;
+
+	UPROPERTY(Category = "Sound", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	USoundCue* PickupSound;
 
 	FVector Buff1SpawnPosition;
 	APickup* CurrentBuff1Pickup;

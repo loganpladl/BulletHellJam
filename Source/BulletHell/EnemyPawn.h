@@ -25,6 +25,9 @@ public:
 
 	void Die();
 
+	void PlayFireSound();
+	void PlayDamagedSound();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -34,6 +37,12 @@ private:
 	int BaseHealth = 3;
 
 	int CurrentHealth;
+
+	UPROPERTY(Category = "Sound", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	USoundCue* FireSound;
+
+	UPROPERTY(Category = "Sound", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	USoundCue* DamagedSound;
 
 	UPROPERTY(Category = "Sound", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	TArray<USoundCue*> DeathSounds;

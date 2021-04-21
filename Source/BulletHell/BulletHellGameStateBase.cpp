@@ -13,6 +13,9 @@ ABulletHellGameStateBase::ABulletHellGameStateBase() {
 
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	PickupAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Pickup Audio"));
+	PickupAudioComponent->SetupAttachment(RootComponent);
 }
 
 void ABulletHellGameStateBase::BeginPlay() {
@@ -55,10 +58,11 @@ void ABulletHellGameStateBase::Tick(float DeltaTime) {
 			CountdownTimer = CountdownDuration;
 		}
 
-		if (PlayerDead) {
+		if (PlayerDead && !GameStartTransitioning) {
 			PlayerRespawnTimer -= DeltaTime;
 
 			if (PlayerRespawnTimer <= 0) {
+				PlayerPawn->PlayRespawnSound();
 				// Respawn Player
 				PlayerDead = false;
 
@@ -72,6 +76,7 @@ void ABulletHellGameStateBase::Tick(float DeltaTime) {
 
 				PlayerPawn->Enable();
 				PlayerPawn->Respawn();
+				PlayerPawn->PlayEngineSound();
 			}
 		}
 
@@ -160,8 +165,13 @@ void ABulletHellGameStateBase::DecrementPlayerHealth() {
 		PlayerRespawnTimer = PlayerRespawnDuration;
 
 		PlayerPawn->Disable();
+		PlayerPawn->StopEngineSound();
+		PlayerPawn->PlayDeathSound();
 
 		DecrementPlayerLives();
+	}
+	else {
+		PlayerPawn->PlayDamagedSound();
 	}
 }
 
@@ -306,6 +316,7 @@ bool ABulletHellGameStateBase::IsValidEnemyUpgrade(EnemyRank Rank) {
 
 void ABulletHellGameStateBase::StartGame() {
 	GameStarted = true;
+	GameStartTransitioning = false;
 }
 
 void ABulletHellGameStateBase::RestartGameTransition() {
@@ -313,6 +324,8 @@ void ABulletHellGameStateBase::RestartGameTransition() {
 
 	PlayerDead = false;
 	PlayerPawn->Enable();
+	// Avoid collisions with enemies that happen in a split second
+	PlayerPawn->DisableCollision();
 
 	CountdownTimer = CountdownDuration;
 
@@ -341,9 +354,15 @@ void ABulletHellGameStateBase::RestartGame() {
 	GameOver = false;
 	GameStartTransitioning = true;
 
-	
+	PlayerPawn->PlayEngineSound();
+	PlayerPawn->EnableCollision();
 }
 
 void ABulletHellGameStateBase::StartGameTransition() {
 	GameStartTransitioning = true;
+}
+
+void ABulletHellGameStateBase::PlayPickupSound() {
+	PickupAudioComponent->SetSound(PickupSound);
+	PickupAudioComponent->Play();
 }

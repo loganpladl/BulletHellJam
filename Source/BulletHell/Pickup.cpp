@@ -94,6 +94,7 @@ void APickup::OnOverlapBegin(UPrimitiveComponent* HitComponent, AActor* OtherAct
 		GameState = Cast<ABulletHellGameStateBase>(GetWorld()->GetGameState());
 
 		GameState->ClearBuffPickups();
+		GameState->PlayPickupSound();
 		
 		// TODO: Spawn particle effect and play sound effect
 

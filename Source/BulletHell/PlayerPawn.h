@@ -6,6 +6,7 @@
 #include "BasePawn.h"
 #include "PaperFlipbook.h"
 #include "Sound/SoundCue.h"
+#include "Components/AudioComponent.h"
 #include "Containers/Array.h"
 #include "PlayerPawn.generated.h"
 
@@ -51,6 +52,12 @@ private:
 	UPaperFlipbook* BankRightFlipbook;
 
 	UPROPERTY(Category = "Sound", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UAudioComponent* EngineAudioComponent;
+
+	UPROPERTY(Category = "Sound", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UAudioComponent* RespawnAudioComponent;
+
+	UPROPERTY(Category = "Sound", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	USoundCue* FireSound;
 
 	UPROPERTY(Category = "Sound", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
@@ -58,6 +65,9 @@ private:
 
 	UPROPERTY(Category = "Sound", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	USoundCue* DeathSound;
+
+	UPROPERTY(Category = "Sound", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	USoundCue* RespawnSound;
 
 	UPROPERTY(category = "Movement", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float MoveSpeedNormal = 1000.0f;
@@ -147,8 +157,17 @@ public:
 	void PlayDamagedSound();
 	void PlayFireSound();
 	void PlayDeathSound();
+	void PlayRespawnSound();
+
+	void PlayEngineSound();
+	void StopEngineSound();
+
+	void EnableCollision();
+	void DisableCollision();
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	
 };

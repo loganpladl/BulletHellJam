@@ -9,12 +9,19 @@
 #include "PlayerBulletPattern.h"
 #include "Math/UnrealMathUtility.h"
 #include "GenericPlatform/GenericPlatformMisc.h"
+#include "Components/CapsuleComponent.h"
 
 APlayerPawn::APlayerPawn() {
 	MinX = 0.0f;
 	MaxX = 0.0f;
 	MinZ = 0.0f;
 	MaxZ = 0.0f;
+
+	EngineAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Engine Audio"));
+	EngineAudioComponent->SetupAttachment(CapsuleComponent);
+
+	RespawnAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Respawn Audio"));
+	RespawnAudioComponent->SetupAttachment(CapsuleComponent);
 }
 
 // Called when the game starts or when spawned
@@ -238,6 +245,14 @@ void APlayerPawn::Enable() {
 	Enabled = true;
 }
 
+void APlayerPawn::EnableCollision() {
+	this->SetActorEnableCollision(true);
+}
+
+void APlayerPawn::DisableCollision() {
+	this->SetActorEnableCollision(false);
+}
+
 void APlayerPawn::Respawn() {
 	SetActorLocation(RespawnPosition);
 }
@@ -343,11 +358,28 @@ void APlayerPawn::PlayDamagedSound() {
 	DamagedAudioComponent->Play();
 }
 
+// TODO: Check for null ptrs here and everywhere else I'm ignoring them
+// TODO: Also should check if sounds are null (avoid crashing)
+
 void APlayerPawn::PlayFireSound() {
 	FireAudioComponent->SetSound(FireSound);
 	FireAudioComponent->Play();
 }
 
 void APlayerPawn::PlayDeathSound() {
+	DeathAudioComponent->SetSound(DeathSound);
 	DeathAudioComponent->Play();
+}
+
+void APlayerPawn::PlayRespawnSound() {
+	RespawnAudioComponent->SetSound(RespawnSound);
+	RespawnAudioComponent->Play();
+}
+
+void APlayerPawn::PlayEngineSound() {
+	EngineAudioComponent->Play();
+}
+
+void APlayerPawn::StopEngineSound() {
+	EngineAudioComponent->Stop();
 }
