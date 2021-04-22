@@ -27,6 +27,9 @@ APickup::APickup()
 
 void APickup::Initialize(PlayerRank PRank, EnemyRank ERank)
 {
+	P = PRank;
+	E = ERank;
+
 	switch (PRank) {
 	case PlayerRank::Health:
 		Buff1FlipbookComponent->SetFlipbook(HealthFlipbookPlayer);
@@ -95,6 +98,8 @@ void APickup::OnOverlapBegin(UPrimitiveComponent* HitComponent, AActor* OtherAct
 
 		GameState->ClearBuffPickups();
 		GameState->PlayPickupSound();
+
+		GameState->PickedUpBuffs(P, E);
 		
 		// TODO: Spawn particle effect and play sound effect
 

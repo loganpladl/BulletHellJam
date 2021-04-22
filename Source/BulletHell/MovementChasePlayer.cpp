@@ -23,7 +23,7 @@ void UMovementChasePlayer::Move(float DeltaTime) {
 	FVector Direction = TargetPosition - Location;
 	Direction.Normalize();
 
-	FVector MoveVector = Direction * MoveSpeed;
+	FVector MoveVector = Direction * AdjustedMoveSpeed;
 
 	GetOwner()->SetActorLocation(Location + MoveVector * DeltaTime);
 

@@ -2,7 +2,10 @@
 
 
 #include "EnemyPawn.h"
+#include "BulletHellGameStateBase.h"
 #include "BaseEnemyMovement.h"
+#include "Components/CapsuleComponent.h"
+#include "PlayerPawn.h"
 
 AEnemyPawn::AEnemyPawn() {
 	CurrentHealth = BaseHealth;
@@ -10,12 +13,37 @@ AEnemyPawn::AEnemyPawn() {
 
 void AEnemyPawn::BeginPlay() {
 	Super::BeginPlay();
-
+	
 	this->Tags.AddUnique(TEXT("Enemy"));
+
+	GameState = Cast<ABulletHellGameStateBase>(GetWorld()->GetGameState());
+	float HealthMultiplier = GameState->GetEnemyHealthMultiplier();
+
+	CurrentHealth *= HealthMultiplier;
+
+	/*
+	// Add dynamic on hit binding
+	CapsuleComponent->OnComponentBeginOverlap.AddDynamic(this, &AEnemyPawn::OnOverlapBegin);
+
+	*/
+
+	PlayerPawn = Cast<APlayerPawn>(GetWorld()->GetFirstPlayerController()->GetPawn());
+}
+
+void AEnemyPawn::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (this->IsOverlappingActor(PlayerPawn)) {
+		if (PlayerPawn->IsVulnerable() && PlayerPawn->CanDamage()) {
+			GameState->DecrementPlayerHealth();
+		}
+	}
 }
 
 void AEnemyPawn::DecrementHealth() {
-	--CurrentHealth;
+	float PlayerDamageMultiplier = GameState->GetPlayerDamageMultiplier();
+	CurrentHealth -= 1 * PlayerDamageMultiplier;
 	if (CurrentHealth <= 0) {
 		Die();
 	}

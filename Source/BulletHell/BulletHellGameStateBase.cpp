@@ -31,8 +31,10 @@ void ABulletHellGameStateBase::BeginPlay() {
 // Called every frame
 void ABulletHellGameStateBase::Tick(float DeltaTime) {
 	if (GameStarted && !GameOver) {
-		CountdownTimer -= DeltaTime;
-		if (CountdownTimer <= 0) {
+		if (!BossSpawned) {
+			CountdownTimer -= DeltaTime;
+		}
+		if (CountdownTimer <= 0 && !BossSpawned) {
 			// Spawn Buffs
 			PlayerRank PlayerRankForPickup1 = GetValidRandomPlayerRank();
 			EnemyRank EnemyRankForPickup1 = GetValidRandomEnemyRank();
@@ -158,8 +160,10 @@ bool ABulletHellGameStateBase::IsOutOfBounds(FVector Position) {
 }
 
 void ABulletHellGameStateBase::DecrementPlayerHealth() {
-	--CurrentPlayerHealth;
-	if (CurrentPlayerHealth == 0) {
+	CurrentPlayerHealth -= 1 + GetEnemyDamageRank();
+	PlayerPawn->ResetDamageTimer();
+
+	if (CurrentPlayerHealth <= 0) {
 		// Kill player
 		PlayerDead = true;
 		PlayerRespawnTimer = PlayerRespawnDuration;
@@ -353,6 +357,7 @@ void ABulletHellGameStateBase::RestartGame() {
 	GameStarted = false;
 	GameOver = false;
 	GameStartTransitioning = true;
+	BossSpawned = false;
 
 	PlayerPawn->PlayEngineSound();
 	PlayerPawn->EnableCollision();
@@ -365,4 +370,53 @@ void ABulletHellGameStateBase::StartGameTransition() {
 void ABulletHellGameStateBase::PlayPickupSound() {
 	PickupAudioComponent->SetSound(PickupSound);
 	PickupAudioComponent->Play();
+}
+
+void ABulletHellGameStateBase::PickedUpBuffs(PlayerRank P, EnemyRank E) {
+	switch (P) {
+	case PlayerRank::Health:
+		UpgradePlayerHealthRank();
+		break;
+	case PlayerRank::Damage:
+		UpgradePlayerDamageRank();
+		break;
+	case PlayerRank::Speed:
+		UpgradePlayerSpeedRank();
+		break;
+	case PlayerRank::BulletSpread:
+		UpgradePlayerBulletSpreadRank();
+		break;
+	case PlayerRank::FireRate:
+		UpgradePlayerFireRateRank();
+		break;
+	default:
+		UpgradePlayerHealthRank();
+		break;
+	}
+
+	switch (E) {
+	case EnemyRank::Health:
+		UpgradeEnemyHealthRank();
+		break;
+	case EnemyRank::Damage:
+		UpgradeEnemyDamageRank();
+		break;
+	case EnemyRank::Speed:
+		UpgradeEnemySpeedRank();
+		break;
+	case EnemyRank::BulletSpeed:
+		UpgradeEnemyBulletSpeedRank();
+		break;
+	case EnemyRank::FireRate:
+		UpgradeEnemyFireRateRank();
+		break;
+	default:
+		UpgradeEnemyHealthRank();
+		break;
+	}
+}
+
+void ABulletHellGameStateBase::KillBoss() {
+	BossKilled = true;
+	PlayerPawn->StopEngineSound();
 }

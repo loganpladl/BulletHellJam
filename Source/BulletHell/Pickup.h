@@ -82,4 +82,7 @@ private:
 
 	// Increment corresponding ranks in gamestate
 	void IncrementCorrespondingRanks();
+
+	PlayerRank P;
+	EnemyRank E;
 };

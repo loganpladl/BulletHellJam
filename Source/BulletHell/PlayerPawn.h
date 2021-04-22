@@ -11,7 +11,7 @@
 #include "PlayerPawn.generated.h"
 
 struct FVector;
-
+class ABulletHellGameStateBase;
 class UPlayerBulletPattern;
 
 /**
@@ -80,8 +80,11 @@ private:
 
 	bool RestartTransitioning = false;
 	
+	UPROPERTY(category = "Movement", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	float MoveSpeedSlowMultiplier = .33f;
 
 	// More precision movement if the player is holding a given button
+	// TODO Delete use multiplier instead
 	UPROPERTY(category = "Movement", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float MoveSpeedSlow = 500.0f;
 
@@ -112,6 +115,8 @@ private:
 
 	int32 CurrentBulletPatternRank = 0;
 
+	UPlayerBulletPattern* CurrentBulletPattern;
+
 	void Move(float DeltaTime);
 
 	void Fire(float DeltaTime);
@@ -130,6 +135,12 @@ private:
 	bool Enabled = true;
 
 	void MoveToStart(float DeltaTime);
+
+	// Prevent more than one hit at once
+	float DamageTimer;
+	float DamageTimerDuration = .5f;
+
+	float AdjustedSpeed;
 
 public:
 	APlayerPawn();
@@ -164,6 +175,9 @@ public:
 
 	void EnableCollision();
 	void DisableCollision();
+
+	bool CanDamage();
+	void ResetDamageTimer();
 
 protected:
 	// Called when the game starts or when spawned

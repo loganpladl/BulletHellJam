@@ -8,6 +8,7 @@
 #include "EngineUtils.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
+#include "BulletHellGameStateBase.h"
 
 // Sets default values for this component's properties
 UBaseBulletPattern::UBaseBulletPattern()
@@ -15,6 +16,8 @@ UBaseBulletPattern::UBaseBulletPattern()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
+
+	AdjustedFireRate = FireRate;
 }
 
 
@@ -45,7 +48,7 @@ void UBaseBulletPattern::BeginPlay()
 		return;
 	}
 	
-	ShotTimer = FireRate;
+	ShotTimer = AdjustedFireRate;
 	CurrentAngle = InitialAngle;
 
 	Enabled = !StartDisabled;
@@ -58,6 +61,7 @@ void UBaseBulletPattern::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	ShotTimer -= DeltaTime;
+
 
 	if (!ReverseSpin) {
 		CurrentSpinSpeed += SpinSpeedDelta * DeltaTime;
@@ -75,7 +79,10 @@ void UBaseBulletPattern::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 	if (ShotTimer <= 0 && Enabled) {
 		Fire();
 		PlayFireSound();
-		ShotTimer = FireRate;
+
+		ABulletHellGameStateBase* GameState = Cast<ABulletHellGameStateBase>(GetWorld()->GetGameState());
+		AdjustedFireRate = FireRate * (1 / GetFireRateMultiplier());
+		ShotTimer = AdjustedFireRate;
 	}
 
 	
@@ -131,7 +138,10 @@ void UBaseBulletPattern::Fire() {
 				float RelativeAngle = Angle;
 
 				FMath::SinCos(&Sin, &Cos, FMath::DegreesToRadians(RelativeAngle));
-				FVector Velocity = { Cos * BulletSpeed, 0, Sin * BulletSpeed };
+
+				float FinalSpeed = BulletSpeed * GetSpeedMultiplier();
+
+				FVector Velocity = { Cos * FinalSpeed, 0, Sin * FinalSpeed };
 				
 				// Get rotation. Sprites are all oriented downwards, but we want to treat 0 degrees as facing rightward like in unit circle.
 				// TODO: Definitely not the best way to do this, but capsule component is root component of bullets so I can't rotate that.
@@ -171,4 +181,12 @@ void UBaseBulletPattern::Disable() {
 
 void UBaseBulletPattern::PlayFireSound() {
 
+}
+
+float UBaseBulletPattern::GetSpeedMultiplier() {
+	return 1;
+}
+
+float UBaseBulletPattern::GetFireRateMultiplier() {
+	return 1;
 }

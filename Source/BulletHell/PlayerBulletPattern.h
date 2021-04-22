@@ -16,4 +16,7 @@ class BULLETHELL_API UPlayerBulletPattern : public UBaseBulletPattern
 	
 public:
 	void PlayFireSound() override;
+
+	float GetSpeedMultiplier() override;
+	float GetFireRateMultiplier() override;
 };

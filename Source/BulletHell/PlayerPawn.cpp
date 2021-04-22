@@ -43,7 +43,12 @@ void APlayerPawn::BeginPlay()
 	SpawnPosition = GetActorLocation();
 	RespawnPosition = { 0.0f, -550.0f, 0.0f };
 
+	DamageTimer = DamageTimerDuration;
+
 	CreateBulletPatterns();
+
+	CurrentBulletPatternRank = GameState->GetPlayerBulletSpreadRank();
+	CurrentBulletPattern = GetCurrentBulletPatternComponent();
 }
 
 // Called every frame
@@ -51,19 +56,24 @@ void APlayerPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	DamageTimer -= DeltaTime;
+
 	ABulletHellGameStateBase* GameState = Cast<ABulletHellGameStateBase>(GetWorld()->GetGameState());
 	bool GameStarted = GameState->IsGameStarted();
 	bool GameOver = GameState->IsGameOver();
 	if (GameStarted && !GameOver) {
+		AdjustedSpeed = MoveSpeedNormal * GameState->GetPlayerSpeedMultiplier();
 		Move(DeltaTime);
 
-		UPlayerBulletPattern* BulletPattern = GetCurrentBulletPatternComponent();
+		CurrentBulletPattern->Disable();
+		CurrentBulletPatternRank = GameState->GetPlayerBulletSpreadRank();
+		CurrentBulletPattern = GetCurrentBulletPatternComponent();
 
 		if (IsShooting && Enabled) {
-			BulletPattern->Enable();
+			CurrentBulletPattern->Enable();
 		}
 		else {
-			BulletPattern->Disable();
+			CurrentBulletPattern->Disable();
 		}
 	}
 	else {
@@ -170,10 +180,10 @@ void APlayerPawn::InputQuitReleased() {
 void APlayerPawn::Move(float DeltaTime) {
 	float speed;
 	if (IsMovingSlow) {
-		speed = MoveSpeedSlow;
+		speed = AdjustedSpeed * MoveSpeedSlowMultiplier;
 	}
 	else {
-		speed = MoveSpeedNormal;
+		speed = AdjustedSpeed;
 	}
 
 	AddActorLocalOffset(MoveDirection * speed * DeltaTime, true);
@@ -382,4 +392,12 @@ void APlayerPawn::PlayEngineSound() {
 
 void APlayerPawn::StopEngineSound() {
 	EngineAudioComponent->Stop();
+}
+
+bool APlayerPawn::CanDamage() {
+	return DamageTimer < 0;
+}
+
+void APlayerPawn::ResetDamageTimer() {
+	DamageTimer = DamageTimerDuration;
 }

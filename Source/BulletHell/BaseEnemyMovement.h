@@ -7,6 +7,7 @@
 #include "BaseEnemyMovement.generated.h"
 
 class APlayerPawn;
+class ABulletHellGameStateBase;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), Blueprintable)
 class BULLETHELL_API UBaseEnemyMovement : public UActorComponent
@@ -28,6 +29,9 @@ protected:
 
 	UPROPERTY(category = "Movement", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float MoveSpeed = 500.0f;
+	float AdjustedMoveSpeed;
+	float MoveSpeedMultiplier;
 
 	APlayerPawn* PlayerPawn;
+	ABulletHellGameStateBase* GameState;
 };

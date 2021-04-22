@@ -80,7 +80,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	int GetEnemyFireRateRank() { return EnemyFireRateRank; }
 
-	void UpgradePlayerHealthRank() { ++PlayerHealthRank; }
+	void UpgradePlayerHealthRank() { 
+		++CurrentPlayerHealth;
+		++PlayerHealthRank; 
+	}
 	void UpgradePlayerDamageRank() { ++PlayerDamageRank; }
 	void UpgradePlayerSpeedRank() { ++PlayerSpeedRank; }
 	void UpgradePlayerBulletSpreadRank() { ++PlayerBulletSpreadRank; }
@@ -142,6 +145,172 @@ public:
 	void ClearBuffPickups();
 
 	void PlayPickupSound();
+
+	void PickedUpBuffs(PlayerRank P, EnemyRank E);
+
+	/*
+	float GetPlayerDamage() {
+		int PlayerDamageRank = GetPlayerDamageRank();
+		switch
+	}
+	*/
+
+	float GetPlayerDamageMultiplier() {
+		int Rank = GetPlayerDamageRank();
+		switch (Rank) {
+		case 0:
+			return 1.0f;
+		case 1:
+			return 1.25f;
+		case 2:
+			return 1.50f;
+		case 3:
+			return 1.75f;
+		case 4:
+			return 2.0f;
+		case 5:
+			return 2.25f;
+		default:
+			return 1.0f;
+		}
+	}
+
+	float GetPlayerSpeedMultiplier() {
+		int Rank = GetPlayerSpeedRank();
+		switch (Rank) {
+		case 0:
+			return 1.0f;
+		case 1:
+			return 1.1f;
+		case 2:
+			return 1.2f;
+		case 3:
+			return 1.3f;
+		case 4:
+			return 1.4f;
+		case 5:
+			return 1.5f;
+		default:
+			return 1.0f;
+		}
+	}
+
+	float GetPlayerFireRateMultiplier() {
+		int Rank = GetPlayerFireRateRank();
+		switch (Rank) {
+		case 0:
+			return 1.0f;
+		case 1:
+			return 1.25f;
+		case 2:
+			return 1.50f;
+		case 3:
+			return 1.75f;
+		case 4:
+			return 2.0f;
+		case 5:
+			return 2.25f;
+		default:
+			return 1.0f;
+		}
+	}
+
+	float GetEnemyHealthMultiplier() {
+		int Rank = GetEnemyHealthRank();
+		switch (Rank) {
+		case 0:
+			return 1.0f;
+		case 1:
+			return 1.25f;
+		case 2:
+			return 1.50f;
+		case 3:
+			return 1.75f;
+		case 4:
+			return 2.0f;
+		case 5:
+			return 2.25f;
+		default:
+			return 1.0f;
+		}
+	}
+
+	float GetEnemySpeedMultiplier() {
+		int Rank = GetEnemySpeedRank();
+		switch (Rank) {
+		case 0:
+			return 1.0f;
+		case 1:
+			return 1.1f;
+		case 2:
+			return 1.2f;
+		case 3:
+			return 1.3f;
+		case 4:
+			return 1.4f;
+		case 5:
+			return 1.5f;
+		default:
+			return 1.0f;
+		}
+	}
+
+	float GetEnemyBulletSpeedMultiplier() {
+		int Rank = GetEnemyBulletSpeedRank();
+		switch (Rank) {
+		case 0:
+			return 1.0f;
+		case 1:
+			return 1.2f;
+		case 2:
+			return 1.4f;
+		case 3:
+			return 1.6f;
+		case 4:
+			return 1.8f;
+		case 5:
+			return 2.0f;
+		default:
+			return 1.0f;
+		}
+	}
+
+	float GetEnemyFireRateMultiplier() {
+		int Rank = GetPlayerFireRateRank();
+		switch (Rank) {
+		case 0:
+			return 1.0f;
+		case 1:
+			return 1.25f;
+		case 2:
+			return 1.50f;
+		case 3:
+			return 1.75f;
+		case 4:
+			return 2.0f;
+		case 5:
+			return 2.25f;
+		default:
+			return 1.0f;
+		}
+	}
+
+	void KillBoss();
+
+	UFUNCTION(BlueprintCallable)
+	bool IsGameWon() {
+		return BossKilled;
+	}
+
+	void BossSpawn() {
+		BossSpawned = true;
+		CountdownTimer = 0.0f;
+	}
+
+	UFUNCTION(BlueprintCallable)
+		bool IsBossSpawned() {
+		return BossSpawned;
+	}
 
 protected:
 	UPROPERTY(Category = "Play Area", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
@@ -214,4 +383,7 @@ private:
 	bool GameRestartTransitioning = false;
 
 	bool GameOver = false;
+
+	bool BossKilled = false;
+	bool BossSpawned = false;
 };

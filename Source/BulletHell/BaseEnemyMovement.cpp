@@ -4,6 +4,7 @@
 #include "BaseEnemyMovement.h"
 #include "PlayerPawn.h"
 #include "Engine/World.h"
+#include "BulletHellGameStateBase.h"
 
 // Sets default values for this component's properties
 UBaseEnemyMovement::UBaseEnemyMovement()
@@ -22,6 +23,7 @@ void UBaseEnemyMovement::BeginPlay()
 	Super::BeginPlay();
 
 	PlayerPawn = Cast<APlayerPawn>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	GameState = Cast<ABulletHellGameStateBase>(GetWorld()->GetGameState());
 }
 
 
@@ -29,6 +31,9 @@ void UBaseEnemyMovement::BeginPlay()
 void UBaseEnemyMovement::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	MoveSpeedMultiplier = GameState->GetEnemySpeedMultiplier();
+	AdjustedMoveSpeed = MoveSpeed * MoveSpeedMultiplier;
 
 	Move(DeltaTime);
 }

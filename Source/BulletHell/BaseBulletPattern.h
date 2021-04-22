@@ -79,14 +79,27 @@ protected:
 	UPROPERTY(Category = "Bullet Pattern", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	bool StartDisabled = false;
 
+	UPROPERTY(Category = "Bullet Pattern", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	bool EnableBurst = false;
+
+	// Seconds per Burst. Should also be scaled by fire rate
+	UPROPERTY(Category = "Bullet Pattern", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	float BurstRate = 1.0f;
+
 	USceneComponent* SpawnPointComponent = nullptr;
 
 	float ShotTimer;
 	float CurrentAngle;
 
+	float AdjustedFireRate;
+	float AdjustedBurstRate;
+
 	bool Enabled = true;
 
 	virtual void PlayFireSound();
+
+	virtual float GetSpeedMultiplier();
+	virtual float GetFireRateMultiplier();
 
 	float CurrentSpinSpeed;
 	bool ReverseSpin = false;
