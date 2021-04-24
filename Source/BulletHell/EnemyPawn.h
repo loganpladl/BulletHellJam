@@ -9,6 +9,8 @@
 #include "EnemyPawn.generated.h"
 
 class UBaseEnemyMovement;
+class APlayerPawn;
+class ABulletHellGameStateBase;
 
 /**
  * 
@@ -23,21 +25,43 @@ public:
 
 	void DecrementHealth();
 
-	void Die();
+	virtual void Die();
+
+	void PlayFireSound();
+	void PlayDamagedSound();
+
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-private:
-	UPROPERTY(category = "Movement", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	int BaseHealth = 3;
+	void PlayDeathSound();
 
-	int CurrentHealth;
+	UPROPERTY(category = "Movement", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	float BaseHealth = 3;
+
+	// If the enemy is offscreen after this many seconds, despawn
+	UPROPERTY(category = "Movement", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	float DespawnSeconds = 3;
+	float TimeSinceSpawned;
+
+	float CurrentHealth;
+
+	UPROPERTY(Category = "Sound", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	USoundCue* FireSound;
+
+	UPROPERTY(Category = "Sound", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	USoundCue* DamagedSound;
 
 	UPROPERTY(Category = "Sound", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	TArray<USoundCue*> DeathSounds;
 
-	void PlayDeathSound();
+	APlayerPawn* PlayerPawn;
+	ABulletHellGameStateBase* GameState;
+
+
+	
 };
 

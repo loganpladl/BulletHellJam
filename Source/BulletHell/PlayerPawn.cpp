@@ -8,12 +8,20 @@
 #include "Math/Color.h"
 #include "PlayerBulletPattern.h"
 #include "Math/UnrealMathUtility.h"
+#include "GenericPlatform/GenericPlatformMisc.h"
+#include "Components/CapsuleComponent.h"
 
 APlayerPawn::APlayerPawn() {
 	MinX = 0.0f;
 	MaxX = 0.0f;
 	MinZ = 0.0f;
 	MaxZ = 0.0f;
+
+	EngineAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Engine Audio"));
+	EngineAudioComponent->SetupAttachment(CapsuleComponent);
+
+	RespawnAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Respawn Audio"));
+	RespawnAudioComponent->SetupAttachment(CapsuleComponent);
 }
 
 // Called when the game starts or when spawned
@@ -32,9 +40,15 @@ void APlayerPawn::BeginPlay()
 	// Add tag for bullets to check
 	this->Tags.AddUnique(TEXT("Player"));
 
-	RespawnPosition = GetActorLocation();
+	SpawnPosition = GetActorLocation();
+	RespawnPosition = { 0.0f, -550.0f, 0.0f };
+
+	DamageTimer = DamageTimerDuration;
 
 	CreateBulletPatterns();
+
+	CurrentBulletPatternRank = GameState->GetPlayerBulletSpreadRank();
+	CurrentBulletPattern = GetCurrentBulletPatternComponent();
 }
 
 // Called every frame
@@ -42,16 +56,45 @@ void APlayerPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	Move(DeltaTime);
+	DamageTimer -= DeltaTime;
 
+	ABulletHellGameStateBase* GameState = Cast<ABulletHellGameStateBase>(GetWorld()->GetGameState());
+	bool GameStarted = GameState->IsGameStarted();
+	bool GameOver = GameState->IsGameOver();
+	if (GameStarted && !GameOver) {
+		AdjustedSpeed = MoveSpeedNormal * GameState->GetPlayerSpeedMultiplier();
+		Move(DeltaTime);
 
-	UPlayerBulletPattern* BulletPattern = GetCurrentBulletPatternComponent();
-	
-	if (IsShooting) {
-		BulletPattern->Enable();
+		CurrentBulletPattern->Disable();
+		CurrentBulletPatternRank = GameState->GetPlayerBulletSpreadRank();
+		CurrentBulletPattern = GetCurrentBulletPatternComponent();
+
+		if (IsShooting && Enabled) {
+			CurrentBulletPattern->Enable();
+		}
+		else {
+			CurrentBulletPattern->Disable();
+		}
 	}
 	else {
-		BulletPattern->Disable();
+		if (IsShooting && !GameState->IsGameStartTransitioning()) {
+			GameState->StartGameTransition();
+		}
+	}
+
+	if (GameState->IsGameStartTransitioning() && !GameState->IsGameStarted()) {
+		MoveToStart(DeltaTime);
+		if (RestartTransitioning) {
+			RestartTransitioning = false;
+		}
+	}
+
+	if (GameState->IsGameRestartTransitioning()) {
+		if (!RestartTransitioning) {
+			RestartTransitioning = true;
+			IntroMoving = false;
+			this->SetActorLocation(SpawnPosition);
+		}
 	}
 }
 
@@ -65,6 +108,11 @@ void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("Shoot", IE_Released, this, &APlayerPawn::InputShootReleased);
 	PlayerInputComponent->BindAction("Focus", IE_Pressed, this, &APlayerPawn::InputFocusPressed);
 	PlayerInputComponent->BindAction("Focus", IE_Released, this, &APlayerPawn::InputFocusReleased);
+
+	PlayerInputComponent->BindAction("Restart", IE_Pressed, this, &APlayerPawn::InputRestartPressed);
+	PlayerInputComponent->BindAction("Restart", IE_Released, this, &APlayerPawn::InputRestartReleased);
+	PlayerInputComponent->BindAction("Quit", IE_Pressed, this, &APlayerPawn::InputQuitPressed);
+	PlayerInputComponent->BindAction("Quit", IE_Released, this, &APlayerPawn::InputQuitReleased);
 }
 
 void APlayerPawn::InputMoveVertical(float Value) {
@@ -72,21 +120,24 @@ void APlayerPawn::InputMoveVertical(float Value) {
 }
 
 void APlayerPawn::InputMoveHorizontal(float Value) {
-	MoveDirection.X = Value;
+	ABulletHellGameStateBase* GameState = Cast<ABulletHellGameStateBase>(GetWorld()->GetGameState());
+	if (GameState->IsGameStarted()) {
+		MoveDirection.X = Value;
 
-	if (Value > 0) {
-		if (BankLeftFlipbook) {
-			FlipbookComponent->SetFlipbook(BankLeftFlipbook);
+		if (Value > 0) {
+			if (BankLeftFlipbook) {
+				FlipbookComponent->SetFlipbook(BankLeftFlipbook);
+			}
 		}
-	}
-	else if (Value < 0) {
-		if (BankRightFlipbook) {
-			FlipbookComponent->SetFlipbook(BankRightFlipbook);
+		else if (Value < 0) {
+			if (BankRightFlipbook) {
+				FlipbookComponent->SetFlipbook(BankRightFlipbook);
+			}
 		}
-	}
-	else {
-		if (IdleFlipbook) {
-			FlipbookComponent->SetFlipbook(IdleFlipbook);
+		else {
+			if (IdleFlipbook) {
+				FlipbookComponent->SetFlipbook(IdleFlipbook);
+			}
 		}
 	}
 }
@@ -107,13 +158,32 @@ void APlayerPawn::InputFocusReleased() {
 	IsMovingSlow = false;
 }
 
+void APlayerPawn::InputRestartPressed() {
+	ABulletHellGameStateBase* GameState = Cast<ABulletHellGameStateBase>(GetWorld()->GetGameState());
+	if (GameState->IsGameOver()) {
+		GameState->RestartGameTransition();
+	}
+}
+
+void APlayerPawn::InputRestartReleased() {
+
+}
+
+void APlayerPawn::InputQuitPressed() {
+	FGenericPlatformMisc::RequestExit(false);
+}
+
+void APlayerPawn::InputQuitReleased() {
+	FGenericPlatformMisc::RequestExit(false);
+}
+
 void APlayerPawn::Move(float DeltaTime) {
 	float speed;
 	if (IsMovingSlow) {
-		speed = MoveSpeedSlow;
+		speed = AdjustedSpeed * MoveSpeedSlowMultiplier;
 	}
 	else {
-		speed = MoveSpeedNormal;
+		speed = AdjustedSpeed;
 	}
 
 	AddActorLocalOffset(MoveDirection * speed * DeltaTime, true);
@@ -125,7 +195,18 @@ void APlayerPawn::Fire(float DeltaTime) {
 	
 }
 
+void APlayerPawn::MoveToStart(float DeltaTime) {
+	if (!IntroMoving) {
+		IntroMoving = true;
+		IntroMoveStartTime = GetWorld()->GetTimeSeconds();
+	}
 
+	float SmoothStepParameter = (GetWorld()->GetTimeSeconds() - IntroMoveStartTime) / IntroDuration;
+
+	float LerpParameter = FMath::SmoothStep(0, 1, SmoothStepParameter);
+	
+	this->SetActorLocation(FMath::Lerp(SpawnPosition, RespawnPosition, LerpParameter));
+}
 
 void APlayerPawn::ClampPosition() {
 	FVector location = GetActorLocation();
@@ -158,6 +239,8 @@ void APlayerPawn::Disable() {
 
 	// Stops the Actor from ticking
 	this->SetActorTickEnabled(false);
+
+	Enabled = false;
 }
 
 void APlayerPawn::Enable() {
@@ -168,6 +251,16 @@ void APlayerPawn::Enable() {
 
 	// Stops the Actor from ticking
 	this->SetActorTickEnabled(true);
+
+	Enabled = true;
+}
+
+void APlayerPawn::EnableCollision() {
+	this->SetActorEnableCollision(true);
+}
+
+void APlayerPawn::DisableCollision() {
+	this->SetActorEnableCollision(false);
 }
 
 void APlayerPawn::Respawn() {
@@ -275,11 +368,36 @@ void APlayerPawn::PlayDamagedSound() {
 	DamagedAudioComponent->Play();
 }
 
+// TODO: Check for null ptrs here and everywhere else I'm ignoring them
+// TODO: Also should check if sounds are null (avoid crashing)
+
 void APlayerPawn::PlayFireSound() {
 	FireAudioComponent->SetSound(FireSound);
 	FireAudioComponent->Play();
 }
 
 void APlayerPawn::PlayDeathSound() {
+	DeathAudioComponent->SetSound(DeathSound);
 	DeathAudioComponent->Play();
+}
+
+void APlayerPawn::PlayRespawnSound() {
+	RespawnAudioComponent->SetSound(RespawnSound);
+	RespawnAudioComponent->Play();
+}
+
+void APlayerPawn::PlayEngineSound() {
+	EngineAudioComponent->Play();
+}
+
+void APlayerPawn::StopEngineSound() {
+	EngineAudioComponent->Stop();
+}
+
+bool APlayerPawn::CanDamage() {
+	return DamageTimer < 0;
+}
+
+void APlayerPawn::ResetDamageTimer() {
+	DamageTimer = DamageTimerDuration;
 }

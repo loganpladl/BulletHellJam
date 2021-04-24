@@ -19,5 +19,5 @@ public:
 	
 private:
 	UPROPERTY(category = "Movement", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	float EndYPosition = .8f;
+	float EndYPosition = .75f;
 };

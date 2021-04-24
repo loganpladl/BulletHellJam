@@ -27,6 +27,9 @@ public:
 
 	void Disable(ABaseBullet* Bullet);
 
+	UFUNCTION(BlueprintCallable)
+	void DisableAllBullets();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

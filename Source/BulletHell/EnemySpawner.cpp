@@ -8,6 +8,8 @@
 #include "BaseEnemyMovement.h"
 #include "UObject/UObjectGlobals.h"
 #include "BaseBulletPattern.h"
+#include "Math/UnrealMathUtility.h"
+#include "Boss.h"
 
 // Sets default values for this component's properties
 UEnemySpawner::UEnemySpawner()
@@ -46,6 +48,158 @@ void UEnemySpawner::SpawnEnemyAtX(TSubclassOf<AEnemyPawn> EnemyClass, TSubclassO
 	float ZWorld = GameState->VerticalFracToWorld(DefaultSpawnYFrac);
 
 	AEnemyPawn* Enemy = GetWorld()->SpawnActor<AEnemyPawn>(EnemyClass, {XWorld, YWorld, ZWorld}, { 0,0,0 });
+	Enemy->SetOwner(this->GetOwner());
+
+	if (!MovementClass) {
+		UE_LOG(LogTemp, Warning, TEXT("No movement class set."));
+		return;
+	}
+
+	UBaseEnemyMovement* MovementComponent = NewObject<UBaseEnemyMovement>(Enemy, MovementClass, TEXT("MovementComponent"));
+	if (MovementComponent) {
+		MovementComponent->RegisterComponent();
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Could not create movement component."));
+	}
+
+
+	if (!BulletPattern) {
+		UE_LOG(LogTemp, Warning, TEXT("No bullet pattern set."));
+		return;
+	}
+
+	UBaseBulletPattern* BulletPatternComponent = NewObject<UBaseBulletPattern>(Enemy, BulletPattern, TEXT("BulletPatternComponent"));
+	if (BulletPatternComponent) {
+		BulletPatternComponent->RegisterComponent();
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Could not create bullet pattern component."));
+	}
+}
+
+void UEnemySpawner::SpawnEnemyLeftAtY(TSubclassOf<AEnemyPawn> EnemyClass, TSubclassOf<UBaseEnemyMovement> MovementClass, TSubclassOf<UBaseBulletPattern> BulletPattern, float y) {
+	ABulletHellGameStateBase* GameState = Cast<ABulletHellGameStateBase>(GetWorld()->GetGameState());
+	float XWorld = GameState->HorizontalFracToWorld(DefaultSpawnLeftXFrac);
+	float YWorld = GameState->GetPlayAreaPlanePosition();
+	float ZWorld = GameState->VerticalFracToWorld(y);
+
+	AEnemyPawn* Enemy = GetWorld()->SpawnActor<AEnemyPawn>(EnemyClass, { XWorld, YWorld, ZWorld }, { 0,0,0 });
+	Enemy->SetOwner(this->GetOwner());
+
+	if (!MovementClass) {
+		UE_LOG(LogTemp, Warning, TEXT("No movement class set."));
+		return;
+	}
+
+	UBaseEnemyMovement* MovementComponent = NewObject<UBaseEnemyMovement>(Enemy, MovementClass, TEXT("MovementComponent"));
+	if (MovementComponent) {
+		MovementComponent->RegisterComponent();
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Could not create movement component."));
+	}
+
+
+	if (!BulletPattern) {
+		UE_LOG(LogTemp, Warning, TEXT("No bullet pattern set."));
+		return;
+	}
+
+	UBaseBulletPattern* BulletPatternComponent = NewObject<UBaseBulletPattern>(Enemy, BulletPattern, TEXT("BulletPatternComponent"));
+	if (BulletPatternComponent) {
+		BulletPatternComponent->RegisterComponent();
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Could not create bullet pattern component."));
+	}
+}
+
+void UEnemySpawner::SpawnEnemyRightAtY(TSubclassOf<AEnemyPawn> EnemyClass, TSubclassOf<UBaseEnemyMovement> MovementClass, TSubclassOf<UBaseBulletPattern> BulletPattern, float y) {
+	ABulletHellGameStateBase* GameState = Cast<ABulletHellGameStateBase>(GetWorld()->GetGameState());
+	float XWorld = GameState->HorizontalFracToWorld(DefaultSpawnRightXFrac);
+	float YWorld = GameState->GetPlayAreaPlanePosition();
+	float ZWorld = GameState->VerticalFracToWorld(y);
+
+	AEnemyPawn* Enemy = GetWorld()->SpawnActor<AEnemyPawn>(EnemyClass, { XWorld, YWorld, ZWorld }, { 0,0,0 });
+	Enemy->SetOwner(this->GetOwner());
+
+	if (!MovementClass) {
+		UE_LOG(LogTemp, Warning, TEXT("No movement class set."));
+		return;
+	}
+
+	UBaseEnemyMovement* MovementComponent = NewObject<UBaseEnemyMovement>(Enemy, MovementClass, TEXT("MovementComponent"));
+	if (MovementComponent) {
+		MovementComponent->RegisterComponent();
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Could not create movement component."));
+	}
+
+
+	if (!BulletPattern) {
+		UE_LOG(LogTemp, Warning, TEXT("No bullet pattern set."));
+		return;
+	}
+
+	UBaseBulletPattern* BulletPatternComponent = NewObject<UBaseBulletPattern>(Enemy, BulletPattern, TEXT("BulletPatternComponent"));
+	if (BulletPatternComponent) {
+		BulletPatternComponent->RegisterComponent();
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Could not create bullet pattern component."));
+	}
+}
+
+void UEnemySpawner::SpawnNEnemiesAtXWithinR(TSubclassOf<AEnemyPawn> EnemyClass, TSubclassOf<UBaseEnemyMovement> MovementClass, TSubclassOf<UBaseBulletPattern> BulletPattern, float N, float X, float R) {
+	for (int i = 0; i < N; i++) {
+		float RandX = FMath::RandRange(0.0f - R, R);
+		float RandY = FMath::RandRange(0.0f - R, R);
+		ABulletHellGameStateBase* GameState = Cast<ABulletHellGameStateBase>(GetWorld()->GetGameState());
+		float XWorld = GameState->HorizontalFracToWorld(X + RandX);
+		float YWorld = GameState->GetPlayAreaPlanePosition();
+		float ZWorld = GameState->VerticalFracToWorld(DefaultSpawnRightXFrac + RandY);
+
+		AEnemyPawn* Enemy = GetWorld()->SpawnActor<AEnemyPawn>(EnemyClass, { XWorld, YWorld, ZWorld }, { 0,0,0 });
+		Enemy->SetOwner(this->GetOwner());
+
+		if (!MovementClass) {
+			UE_LOG(LogTemp, Warning, TEXT("No movement class set."));
+			return;
+		}
+
+		UBaseEnemyMovement* MovementComponent = NewObject<UBaseEnemyMovement>(Enemy, MovementClass, TEXT("MovementComponent"));
+		if (MovementComponent) {
+			MovementComponent->RegisterComponent();
+		}
+		else {
+			UE_LOG(LogTemp, Warning, TEXT("Could not create movement component."));
+		}
+
+
+		if (!BulletPattern) {
+			UE_LOG(LogTemp, Warning, TEXT("No bullet pattern set."));
+			return;
+		}
+
+		UBaseBulletPattern* BulletPatternComponent = NewObject<UBaseBulletPattern>(Enemy, BulletPattern, TEXT("BulletPatternComponent"));
+		if (BulletPatternComponent) {
+			BulletPatternComponent->RegisterComponent();
+		}
+		else {
+			UE_LOG(LogTemp, Warning, TEXT("Could not create bullet pattern component."));
+		}
+	}
+}
+
+void UEnemySpawner::SpawnBoss(TSubclassOf<AEnemyPawn> EnemyClass, TSubclassOf<UBaseEnemyMovement> MovementClass, TSubclassOf<UBaseBulletPattern> BulletPattern) {
+	ABulletHellGameStateBase* GameState = Cast<ABulletHellGameStateBase>(GetWorld()->GetGameState());
+	float XWorld = GameState->HorizontalFracToWorld(0);
+	float YWorld = GameState->GetPlayAreaPlanePosition();
+	float ZWorld = GameState->VerticalFracToWorld(DefaultSpawnRightXFrac + .3);
+
+	AEnemyPawn* Enemy = GetWorld()->SpawnActor<AEnemyPawn>(EnemyClass, { XWorld, YWorld, ZWorld }, { 0,0,0 });
 	Enemy->SetOwner(this->GetOwner());
 
 	if (!MovementClass) {

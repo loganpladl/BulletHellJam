@@ -55,8 +55,16 @@ private:
 	// Location to lerp to
 	FVector TargetPosition;
 
+	FVector RestartFromPosition;
+
 	UPROPERTY(Category = "Background Scrolling", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	float ScrollSpeed = 2.5f;
 
 	AActor* Owner;
+
+	float RestartTransitionDuration = 3.0f;
+
+	bool RestartMoving = false;
+
+	float RestartMoveStartTime;
 };

@@ -8,6 +8,7 @@
 #include "EngineUtils.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
+#include "BulletHellGameStateBase.h"
 
 // Sets default values for this component's properties
 UBaseBulletPattern::UBaseBulletPattern()
@@ -15,6 +16,8 @@ UBaseBulletPattern::UBaseBulletPattern()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
+
+	AdjustedFireRate = FireRate;
 }
 
 
@@ -45,10 +48,18 @@ void UBaseBulletPattern::BeginPlay()
 		return;
 	}
 	
-	ShotTimer = FireRate;
+	ShotTimer = AdjustedFireRate;
 	CurrentAngle = InitialAngle;
 
 	Enabled = !StartDisabled;
+
+	AdjustedBurstActiveDuration = BurstActiveDuration * (1 / GetFireRateMultiplier());
+	BurstActiveTimer = AdjustedBurstActiveDuration;
+
+	AdjustedBurstRate = BurstRate * (1 / GetFireRateMultiplier());
+	BurstRepeatTimer = AdjustedBurstRate;
+
+	InitialDelayTimer = InitialDelay;
 }
 
 
@@ -57,14 +68,67 @@ void UBaseBulletPattern::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	ShotTimer -= DeltaTime;
-	if (ShotTimer <= 0 && Enabled) {
-		Fire();
-		PlayFireSound();
-		ShotTimer = FireRate;
+	if (InitialDelayTimer > 0) {
+		InitialDelayTimer -= DeltaTime;
+		return;
 	}
 
-	
+	ShotTimer -= DeltaTime;
+
+	if (EnableBurst) {
+		BurstActiveTimer -= DeltaTime;
+		BurstRepeatTimer -= DeltaTime;
+	}
+
+	if (Spinning) {
+		if (SpinReversal) {
+			if (!ReverseSpin) {
+				CurrentSpinSpeed += SpinSpeedDelta * DeltaTime;
+				if (CurrentSpinSpeed >= MaxSpinSpeed) {
+					ReverseSpin = true;
+				}
+			}
+			else {
+				CurrentSpinSpeed += SpinSpeedDelta * DeltaTime;
+				if (CurrentSpinSpeed <= -MaxSpinSpeed) {
+					ReverseSpin = false;
+				}
+			}
+			SpunAngle += CurrentSpinSpeed;
+		}
+		// Just use max angle if we're using constant spin
+		else {
+			SpunAngle += MaxSpinSpeed * DeltaTime;
+		}
+		SpunAngle = fmod(SpunAngle, 360);
+	}
+
+	if (ShotTimer <= 0 && Enabled) {
+		// Burst logic
+		if (EnableBurst) {
+			if (BurstRepeat()) {
+				AdjustedBurstActiveDuration = BurstActiveDuration * (1 / GetFireRateMultiplier());
+				BurstActiveTimer = AdjustedBurstActiveDuration;
+
+				// Get rid of extra shot by subtracting adjusted fire rate
+				AdjustedFireRate = FireRate * (1 / GetFireRateMultiplier());
+				BurstActiveTimer -= AdjustedFireRate;
+
+				AdjustedBurstRate = BurstRate * (1 / GetFireRateMultiplier());
+				BurstRepeatTimer = AdjustedBurstRate;
+			}
+			if (!BurstActive()) {
+				// Don't fire if burst is enabled but not active
+				return;
+			}
+		}
+
+		Fire();
+		PlayFireSound();
+
+		AdjustedFireRate = FireRate * (1 / GetFireRateMultiplier());
+		ShotTimer = AdjustedFireRate;
+	}
 }
 
 void UBaseBulletPattern::Fire() {
@@ -81,6 +145,30 @@ void UBaseBulletPattern::Fire() {
 			AngleBetweenStreams = StreamAngle / (BulletStreamsPerSection - 1);
 		}
 
+		
+		// Rotate shots according to parent's orientation. Used for enemies that rotate.
+		FRotator ParentRotation = this->GetOwner()->GetActorRotation();
+
+		float Pitch = ParentRotation.Pitch;
+		FVector ParentVector = ParentRotation.Vector();
+		FVector Forward = this->GetOwner()->GetActorUpVector();
+
+		if (ParentVector.X < 0) {
+			if (Forward.Z < 0) {
+				Pitch = 180 - Pitch;
+			}
+			else {
+				Pitch = -Pitch;
+			}
+		}
+		else {
+			if (Forward.Z < 0) {
+				Pitch = -180 + Pitch;
+			}
+		}
+
+		CurrentAngle = InitialAngle + Pitch + SpunAngle;
+
 		float Angle;
 		// Spawn each section
 		for (int i = 0; i < BulletSections; i++) {
@@ -90,12 +178,17 @@ void UBaseBulletPattern::Fire() {
 			for (int j = 0; j < BulletStreamsPerSection; j++) {
 				float Cos, Sin;
 
-				FMath::SinCos(&Sin, &Cos, FMath::DegreesToRadians(Angle));
-				FVector Velocity = { Cos * BulletSpeed, 0, Sin * BulletSpeed };
+				float RelativeAngle = Angle;
+
+				FMath::SinCos(&Sin, &Cos, FMath::DegreesToRadians(RelativeAngle));
+
+				float FinalSpeed = BulletSpeed * GetSpeedMultiplier();
+
+				FVector Velocity = { Cos * FinalSpeed, 0, Sin * FinalSpeed };
 				
 				// Get rotation. Sprites are all oriented downwards, but we want to treat 0 degrees as facing rightward like in unit circle.
 				// TODO: Definitely not the best way to do this, but capsule component is root component of bullets so I can't rotate that.
-				FMath::SinCos(&Sin, &Cos, FMath::DegreesToRadians(Angle + 90));
+				FMath::SinCos(&Sin, &Cos, FMath::DegreesToRadians(RelativeAngle + 90));
 				FVector Rotation = { Cos, 0, Sin };
 
 				BulletPool->Instantiate(SpawnPosition, Rotation.Rotation(), Velocity);
@@ -131,4 +224,12 @@ void UBaseBulletPattern::Disable() {
 
 void UBaseBulletPattern::PlayFireSound() {
 
+}
+
+float UBaseBulletPattern::GetSpeedMultiplier() {
+	return 1;
+}
+
+float UBaseBulletPattern::GetFireRateMultiplier() {
+	return 1;
 }

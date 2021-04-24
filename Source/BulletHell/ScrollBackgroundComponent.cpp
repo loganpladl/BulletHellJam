@@ -36,13 +36,37 @@ void UScrollBackgroundComponent::TickComponent(float DeltaTime, ELevelTick TickT
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	ScrollHorizontal();
+	ABulletHellGameStateBase* GameState = Cast<ABulletHellGameStateBase>(GetWorld()->GetGameState());
+	if (GameState->IsGameStarted() && !GameState->IsGameOver()) {
+		ScrollHorizontal();
 
-	ScrollVertical(DeltaTime);
+		ScrollVertical(DeltaTime);
 
-	
-	FVector NewLocation = FMath::Lerp(Owner->GetActorLocation(), TargetPosition, ScrollSpeed * DeltaTime);
-	Owner->SetActorLocation(NewLocation);
+
+		FVector NewLocation = FMath::Lerp(Owner->GetActorLocation(), TargetPosition, ScrollSpeed * DeltaTime);
+		Owner->SetActorLocation(NewLocation);
+
+		if (RestartMoving) {
+			RestartMoving = false;
+		}
+	}
+
+	if (GameState->IsGameRestartTransitioning()) {
+		if (!RestartMoving) {
+			RestartMoving = true;
+			RestartMoveStartTime = GetWorld()->GetTimeSeconds();
+			CurrentLengthScrolled = 0.0f;
+			CurrentVerticalHeight = StartingPosition.Z;
+			RestartFromPosition = TargetPosition;
+			TargetPosition = StartingPosition;
+		}
+
+		float SmoothStepParameter = (GetWorld()->GetTimeSeconds() - RestartMoveStartTime) / RestartTransitionDuration;
+
+		float LerpParameter = FMath::SmoothStep(0, 1, SmoothStepParameter);
+
+		Owner->SetActorLocation(FMath::Lerp(RestartFromPosition, StartingPosition, LerpParameter));
+	}
 }
 
 
