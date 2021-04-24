@@ -52,6 +52,14 @@ void UBaseBulletPattern::BeginPlay()
 	CurrentAngle = InitialAngle;
 
 	Enabled = !StartDisabled;
+
+	AdjustedBurstActiveDuration = BurstActiveDuration * (1 / GetFireRateMultiplier());
+	BurstActiveTimer = AdjustedBurstActiveDuration;
+
+	AdjustedBurstRate = BurstRate * (1 / GetFireRateMultiplier());
+	BurstRepeatTimer = AdjustedBurstRate;
+
+	InitialDelayTimer = InitialDelay;
 }
 
 
@@ -60,32 +68,67 @@ void UBaseBulletPattern::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	if (InitialDelayTimer > 0) {
+		InitialDelayTimer -= DeltaTime;
+		return;
+	}
+
 	ShotTimer -= DeltaTime;
 
-
-	if (!ReverseSpin) {
-		CurrentSpinSpeed += SpinSpeedDelta * DeltaTime;
-		if (CurrentSpinSpeed >= MaxSpinSpeed) {
-			ReverseSpin = true;
-		}
+	if (EnableBurst) {
+		BurstActiveTimer -= DeltaTime;
+		BurstRepeatTimer -= DeltaTime;
 	}
-	else {
-		CurrentSpinSpeed += SpinSpeedDelta * DeltaTime;
-		if (CurrentSpinSpeed <= -MaxSpinSpeed) {
-			ReverseSpin = false;
+
+	if (Spinning) {
+		if (SpinReversal) {
+			if (!ReverseSpin) {
+				CurrentSpinSpeed += SpinSpeedDelta * DeltaTime;
+				if (CurrentSpinSpeed >= MaxSpinSpeed) {
+					ReverseSpin = true;
+				}
+			}
+			else {
+				CurrentSpinSpeed += SpinSpeedDelta * DeltaTime;
+				if (CurrentSpinSpeed <= -MaxSpinSpeed) {
+					ReverseSpin = false;
+				}
+			}
+			SpunAngle += CurrentSpinSpeed;
 		}
+		// Just use max angle if we're using constant spin
+		else {
+			SpunAngle += MaxSpinSpeed * DeltaTime;
+		}
+		SpunAngle = fmod(SpunAngle, 360);
 	}
 
 	if (ShotTimer <= 0 && Enabled) {
+		// Burst logic
+		if (EnableBurst) {
+			if (BurstRepeat()) {
+				AdjustedBurstActiveDuration = BurstActiveDuration * (1 / GetFireRateMultiplier());
+				BurstActiveTimer = AdjustedBurstActiveDuration;
+
+				// Get rid of extra shot by subtracting adjusted fire rate
+				AdjustedFireRate = FireRate * (1 / GetFireRateMultiplier());
+				BurstActiveTimer -= AdjustedFireRate;
+
+				AdjustedBurstRate = BurstRate * (1 / GetFireRateMultiplier());
+				BurstRepeatTimer = AdjustedBurstRate;
+			}
+			if (!BurstActive()) {
+				// Don't fire if burst is enabled but not active
+				return;
+			}
+		}
+
 		Fire();
 		PlayFireSound();
 
-		ABulletHellGameStateBase* GameState = Cast<ABulletHellGameStateBase>(GetWorld()->GetGameState());
 		AdjustedFireRate = FireRate * (1 / GetFireRateMultiplier());
 		ShotTimer = AdjustedFireRate;
 	}
-
-	
 }
 
 void UBaseBulletPattern::Fire() {
@@ -124,7 +167,7 @@ void UBaseBulletPattern::Fire() {
 			}
 		}
 
-		CurrentAngle = InitialAngle + Pitch;
+		CurrentAngle = InitialAngle + Pitch + SpunAngle;
 
 		float Angle;
 		// Spawn each section

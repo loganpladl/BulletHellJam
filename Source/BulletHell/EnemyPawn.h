@@ -42,6 +42,11 @@ protected:
 	UPROPERTY(category = "Movement", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float BaseHealth = 3;
 
+	// If the enemy is offscreen after this many seconds, despawn
+	UPROPERTY(category = "Movement", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	float DespawnSeconds = 3;
+	float TimeSinceSpawned;
+
 	float CurrentHealth;
 
 	UPROPERTY(Category = "Sound", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
@@ -55,6 +60,8 @@ protected:
 
 	APlayerPawn* PlayerPawn;
 	ABulletHellGameStateBase* GameState;
+
+
 	
 };
 

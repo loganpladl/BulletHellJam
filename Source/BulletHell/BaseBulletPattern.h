@@ -58,6 +58,9 @@ protected:
 	float AngleBetweenSections = 90.0f; // in degrees
 
 	UPROPERTY(Category = "Bullet Pattern", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	bool Spinning = false;
+
+	UPROPERTY(Category = "Bullet Pattern", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	float SpinSpeedDelta = 0.0f;
 
 	UPROPERTY(Category = "Bullet Pattern", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
@@ -82,17 +85,32 @@ protected:
 	UPROPERTY(Category = "Bullet Pattern", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	bool EnableBurst = false;
 
-	// Seconds per Burst. Should also be scaled by fire rate
+	// Seconds per firing Burst. Should also be scaled by fire rate
 	UPROPERTY(Category = "Bullet Pattern", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	float BurstRate = 1.0f;
+	float BurstActiveDuration = 1.0f;
+
+	// Seconds per firing Burst. Should also be scaled by fire rate
+	UPROPERTY(Category = "Bullet Pattern", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	float BurstRate = 4.0f;
+
+	// Time before shooting starts
+	UPROPERTY(Category = "Bullet Pattern", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	float InitialDelay = 0.0f;
+	float InitialDelayTimer;
 
 	USceneComponent* SpawnPointComponent = nullptr;
 
 	float ShotTimer;
 	float CurrentAngle;
 
+	float BurstActiveTimer;
+	float BurstRepeatTimer;
+
 	float AdjustedFireRate;
 	float AdjustedBurstRate;
+	float AdjustedBurstActiveDuration;
+
+	float SpunAngle = 0.0f;
 
 	bool Enabled = true;
 
@@ -100,6 +118,14 @@ protected:
 
 	virtual float GetSpeedMultiplier();
 	virtual float GetFireRateMultiplier();
+
+	bool BurstActive() {
+		return BurstActiveTimer > 0;
+	}
+
+	bool BurstRepeat() {
+		return BurstRepeatTimer < 0;
+	}
 
 	float CurrentSpinSpeed;
 	bool ReverseSpin = false;

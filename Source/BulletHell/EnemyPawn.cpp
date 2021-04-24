@@ -8,7 +8,7 @@
 #include "PlayerPawn.h"
 
 AEnemyPawn::AEnemyPawn() {
-	CurrentHealth = BaseHealth;
+	
 }
 
 void AEnemyPawn::BeginPlay() {
@@ -21,18 +21,21 @@ void AEnemyPawn::BeginPlay() {
 
 	CurrentHealth *= HealthMultiplier;
 
-	/*
-	// Add dynamic on hit binding
-	CapsuleComponent->OnComponentBeginOverlap.AddDynamic(this, &AEnemyPawn::OnOverlapBegin);
-
-	*/
-
 	PlayerPawn = Cast<APlayerPawn>(GetWorld()->GetFirstPlayerController()->GetPawn());
+
+	CurrentHealth = BaseHealth;
 }
 
 void AEnemyPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	TimeSinceSpawned += DeltaTime;
+	if (TimeSinceSpawned > DespawnSeconds) {
+		if (GameState->IsOutOfBounds(this->GetActorLocation())) {
+			this->Destroy();
+		}
+	}
 
 	if (this->IsOverlappingActor(PlayerPawn)) {
 		if (PlayerPawn->IsVulnerable() && PlayerPawn->CanDamage()) {

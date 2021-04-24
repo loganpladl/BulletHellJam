@@ -4,20 +4,25 @@
 
 #include "CoreMinimal.h"
 #include "BaseEnemyMovement.h"
-#include "MovementVerticalStop.generated.h"
+#include "MovementHorizontalStop.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class BULLETHELL_API UMovementVerticalStop : public UBaseEnemyMovement
+class BULLETHELL_API UMovementHorizontalStop : public UBaseEnemyMovement
 {
 	GENERATED_BODY()
-
+	
 public:
 	virtual void Move(float DeltaTime) override;
-	
+
+	// Called when the game starts
+	virtual void BeginPlay() override;
+
 private:
 	UPROPERTY(category = "Movement", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	float EndYPosition = .75f;
+	float EndXPosition = .75f;
+
+	bool MovingRight;
 };

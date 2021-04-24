@@ -241,15 +241,15 @@ public:
 		case 0:
 			return 1.0f;
 		case 1:
-			return 1.1f;
+			return 1.05f;
 		case 2:
-			return 1.2f;
+			return 1.10f;
 		case 3:
-			return 1.3f;
+			return 1.15f;
 		case 4:
-			return 1.4f;
+			return 1.20f;
 		case 5:
-			return 1.5f;
+			return 1.25f;
 		default:
 			return 1.0f;
 		}
@@ -276,7 +276,7 @@ public:
 	}
 
 	float GetEnemyFireRateMultiplier() {
-		int Rank = GetPlayerFireRateRank();
+		int Rank = GetEnemyFireRateRank();
 		switch (Rank) {
 		case 0:
 			return 1.0f;
@@ -312,6 +312,31 @@ public:
 		return BossSpawned;
 	}
 
+	void PlayVictoryAudio() {
+		VictoryAudioComponent->SetSound(VictorySound);
+		VictoryAudioComponent->Play();
+	}
+	void PlayGameOverAudio() {
+		GameOverAudioComponent->SetSound(GameOverSound);
+		GameOverAudioComponent->Play();
+	}
+	UFUNCTION(BlueprintCallable)
+	void PlayWinScreenAudio() {
+		WinScreenAudioComponent->SetSound(WinScreenSound);
+		WinScreenAudioComponent->Play();
+	}
+	UFUNCTION(BlueprintCallable)
+	void PlayGameOverScreenAudio() {
+		GameOverScreenAudioComponent->SetSound(GameOverScreenSound);
+		GameOverScreenAudioComponent->Play();
+	}
+	void StopWinScreenAudio() {
+		WinScreenAudioComponent->Stop();
+	}
+	void StopGameOverScreenAudio() {
+		GameOverScreenAudioComponent->Stop();
+	}
+
 protected:
 	UPROPERTY(Category = "Play Area", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float PlayAreaWidth = 720.0f;
@@ -337,6 +362,30 @@ protected:
 
 	UPROPERTY(Category = "Sound", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	USoundCue* PickupSound;
+
+	UPROPERTY(Category = "Sound", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UAudioComponent* VictoryAudioComponent;
+
+	UPROPERTY(Category = "Sound", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	USoundCue* VictorySound;
+
+	UPROPERTY(Category = "Sound", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UAudioComponent* GameOverAudioComponent;
+
+	UPROPERTY(Category = "Sound", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	USoundCue* GameOverSound;
+
+	UPROPERTY(Category = "Sound", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UAudioComponent* GameOverScreenAudioComponent;
+
+	UPROPERTY(Category = "Sound", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	USoundCue* GameOverScreenSound;
+
+	UPROPERTY(Category = "Sound", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UAudioComponent* WinScreenAudioComponent;
+
+	UPROPERTY(Category = "Sound", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	USoundCue* WinScreenSound;
 
 	FVector Buff1SpawnPosition;
 	APickup* CurrentBuff1Pickup;
@@ -386,4 +435,7 @@ private:
 
 	bool BossKilled = false;
 	bool BossSpawned = false;
+
+	float PreventRestartTimer;
+	float PreventRestartDuration = 1.5f;
 };

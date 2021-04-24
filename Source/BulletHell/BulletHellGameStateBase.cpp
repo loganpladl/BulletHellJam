@@ -15,7 +15,19 @@ ABulletHellGameStateBase::ABulletHellGameStateBase() {
 	PrimaryActorTick.bCanEverTick = true;
 
 	PickupAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Pickup Audio"));
-	PickupAudioComponent->SetupAttachment(RootComponent);
+	RootComponent = PickupAudioComponent;
+
+	VictoryAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Victory Audio"));
+	VictoryAudioComponent->SetupAttachment(RootComponent);
+
+	GameOverAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Game Over Audio"));
+	GameOverAudioComponent->SetupAttachment(RootComponent);
+
+	GameOverScreenAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Game Over Screen Audio"));
+	GameOverScreenAudioComponent->SetupAttachment(RootComponent);
+
+	WinScreenAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Win Screen Audio"));
+	WinScreenAudioComponent->SetupAttachment(RootComponent);
 }
 
 void ABulletHellGameStateBase::BeginPlay() {
@@ -26,10 +38,15 @@ void ABulletHellGameStateBase::BeginPlay() {
 
 	Buff1SpawnPosition = { HorizontalFracToWorld(-.5), PlayAreaPlanePosition, VerticalFracToWorld(1.1) };
 	Buff2SpawnPosition = { HorizontalFracToWorld(.5), PlayAreaPlanePosition, VerticalFracToWorld(1.1) };
+
+	PreventRestartTimer = PreventRestartDuration;
 }
 
 // Called every frame
 void ABulletHellGameStateBase::Tick(float DeltaTime) {
+	if (GameOver) {
+		PreventRestartTimer -= DeltaTime;
+	}
 	if (GameStarted && !GameOver) {
 		if (!BossSpawned) {
 			CountdownTimer -= DeltaTime;
@@ -182,8 +199,9 @@ void ABulletHellGameStateBase::DecrementPlayerHealth() {
 void ABulletHellGameStateBase::DecrementPlayerLives() {
 	--CurrentPlayerLives;
 	if (CurrentPlayerLives == 0) {
+		PreventRestartTimer = PreventRestartDuration;
 		GameOver = true;
-		
+		PlayGameOverAudio();
 	}
 }
 
@@ -324,31 +342,35 @@ void ABulletHellGameStateBase::StartGame() {
 }
 
 void ABulletHellGameStateBase::RestartGameTransition() {
-	GameRestartTransitioning = true;
+	if (PreventRestartTimer < 0) {
+		GameRestartTransitioning = true;
 
-	PlayerDead = false;
-	PlayerPawn->Enable();
-	// Avoid collisions with enemies that happen in a split second
-	PlayerPawn->DisableCollision();
+		StopGameOverScreenAudio();
 
-	CountdownTimer = CountdownDuration;
+		PlayerDead = false;
+		PlayerPawn->Enable();
+		// Avoid collisions with enemies that happen in a split second
+		PlayerPawn->DisableCollision();
 
-	PlayerHealthRank = 0;
-	PlayerDamageRank = 0;
-	PlayerSpeedRank = 0;
-	PlayerBulletSpreadRank = 0;
-	PlayerFireRateRank = 0;
-	EnemyHealthRank = 0;
-	EnemyDamageRank = 0;
-	EnemySpeedRank = 0;
-	EnemyBulletSpeedRank = 0;
-	EnemyFireRateRank = 0;
+		CountdownTimer = CountdownDuration;
 
-	CurrentPlayerHealth = 3;
-	CurrentPlayerLives = 3;
+		PlayerHealthRank = 0;
+		PlayerDamageRank = 0;
+		PlayerSpeedRank = 0;
+		PlayerBulletSpreadRank = 0;
+		PlayerFireRateRank = 0;
+		EnemyHealthRank = 0;
+		EnemyDamageRank = 0;
+		EnemySpeedRank = 0;
+		EnemyBulletSpeedRank = 0;
+		EnemyFireRateRank = 0;
 
-	PlayerRespawnTimer = PlayerRespawnDuration;
-	PlayerInvulnerable = false;
+		CurrentPlayerHealth = 3;
+		CurrentPlayerLives = 3;
+
+		PlayerRespawnTimer = PlayerRespawnDuration;
+		PlayerInvulnerable = false;
+	}
 }
 
 void ABulletHellGameStateBase::RestartGame() {
@@ -418,5 +440,8 @@ void ABulletHellGameStateBase::PickedUpBuffs(PlayerRank P, EnemyRank E) {
 
 void ABulletHellGameStateBase::KillBoss() {
 	BossKilled = true;
+	PlayVictoryAudio();
 	PlayerPawn->StopEngineSound();
+	// For safety
+	PlayerPawn->MakeInvulnerable();
 }
