@@ -7,7 +7,7 @@
 #include "Math/Vector.h"
 #include "ScrollBackgroundComponent.generated.h"
 
-
+// Used for a single background scroll, no repetition
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BULLETHELL_API UScrollBackgroundComponent : public UActorComponent
 {
@@ -35,12 +35,12 @@ private:
 
 	// Vertical Scroll in pixels per second
 	UPROPERTY(Category = "Background Scrolling", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	float VerticalScrollSpeed = 5.0f;
+	float VerticalScrollSpeed = 25.0f;
 
 	// Total length to scroll vertically before stopping
 	// Can calculate by subtracting 1080 from sprite height
 	UPROPERTY(Category = "Background Scrolling", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	int VerticalScrollLength = 4040;
+	int VerticalScrollLength = 3770;
 
 	// Vertical height before panning from movement
 	float CurrentVerticalHeight = 0.0f;
@@ -58,7 +58,7 @@ private:
 	FVector RestartFromPosition;
 
 	UPROPERTY(Category = "Background Scrolling", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	float ScrollSpeed = 2.5f;
+	float ScrollSpeed = 1.25f;
 
 	AActor* Owner;
 

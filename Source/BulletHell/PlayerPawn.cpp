@@ -126,17 +126,17 @@ void APlayerPawn::InputMoveHorizontal(float Value) {
 
 		if (Value > 0) {
 			if (BankLeftFlipbook) {
-				FlipbookComponent->SetFlipbook(BankLeftFlipbook);
+				//FlipbookComponent->SetFlipbook(BankLeftFlipbook);
 			}
 		}
 		else if (Value < 0) {
 			if (BankRightFlipbook) {
-				FlipbookComponent->SetFlipbook(BankRightFlipbook);
+				//FlipbookComponent->SetFlipbook(BankRightFlipbook);
 			}
 		}
 		else {
 			if (IdleFlipbook) {
-				FlipbookComponent->SetFlipbook(IdleFlipbook);
+				//FlipbookComponent->SetFlipbook(IdleFlipbook);
 			}
 		}
 	}
@@ -186,6 +186,7 @@ void APlayerPawn::Move(float DeltaTime) {
 		speed = AdjustedSpeed;
 	}
 
+	MoveDirection.Normalize();
 	AddActorLocalOffset(MoveDirection * speed * DeltaTime, true);
 
 	ClampPosition();
